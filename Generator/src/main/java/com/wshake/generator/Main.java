@@ -32,6 +32,7 @@ public class Main {
                             .moduleName("generator")
                             .build();
                 })
+
                 .strategyConfig(builder -> {
                     builder.addDataBase("students");
                     builder.controllerBuilder()

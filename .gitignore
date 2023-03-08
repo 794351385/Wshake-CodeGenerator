@@ -19,3 +19,5 @@ buildNumber.properties
 **/target
 .idea
 **/README.md
+logs
+/Generator/src/test

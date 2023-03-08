@@ -264,10 +264,14 @@ public class GeneratorFacade {
              * 准备数据模型
              * 调用Generator核心处理
              */
+            List<Injection> sqlInjections = injectionConfig.getSqlInjections();
+            for (Injection in:sqlInjections) {
+                generator.oneGenerate(dataModel,in.getTemplatePath(),in.getOutputPath());
+            }
             generator.filterAndGenerate(dataModel);
         }
-        if(injectionConfig.isInjections()){
-            List<Injection> injections = injectionConfig.getInjections();
+        if(injectionConfig.isOneInjections()){
+            List<Injection> injections = injectionConfig.getOneInjections();
             for (Injection in:injections) {
                 generator.oneGenerate(dataModel,in.getTemplatePath(),in.getOutputPath());
             }

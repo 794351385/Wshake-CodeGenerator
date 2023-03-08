@@ -22,23 +22,43 @@ public class InjectionConfig {
     public static InjectionConfig getInjectionConfig(){
         return injectionConfig;
     }
-    private List<Injection> injections;
-    private Consumer<List<Injection>> customOutputFileConsumer;
+    private List<Injection> oneInjections;
+    private Consumer<List<Injection>> customOneOutputFileConsumer;
 
-    public Boolean isInjections(){
-        if(injections!=null && injections.size()>0){
+    private List<Injection> sqlInjections;
+    private Consumer<List<Injection>> customSqlOutputFileConsumer;
+
+    public Boolean isOneInjections(){
+        if(oneInjections!=null && oneInjections.size()>0){
             return true;
         }
         return false;
     }
-    public List<Injection> getInjections(){
-        return injections;
+    public List<Injection> getOneInjections(){
+        return oneInjections;
     }
 
     @NotNull
-    public void customOutputFile(List<Injection> injections) {
+    public void customOneOutputFile(List<Injection> injections) {
         if(injections!=null && injections.size()!=0){
-            this.injections=injections;
+            this.oneInjections=injections;
+        }
+    }
+
+    public Boolean isSqlInjections(){
+        if(sqlInjections!=null && sqlInjections.size()>0){
+            return true;
+        }
+        return false;
+    }
+    public List<Injection> getSqlInjections(){
+        return sqlInjections;
+    }
+
+    @NotNull
+    public void customSqlOutputFile(List<Injection> injections) {
+        if(injections!=null && injections.size()!=0){
+            this.sqlInjections=injections;
         }
     }
 
@@ -59,8 +79,12 @@ public class InjectionConfig {
             this.injectionConfig = InjectionConfig.getInjectionConfig();
         }
 
-        public Builder customOutputFile(@NotNull Consumer<List<Injection>> consumer) {
-            this.injectionConfig.customOutputFileConsumer = consumer;
+        public Builder customOneOutputFile(@NotNull Consumer<List<Injection>> consumer) {
+            this.injectionConfig.customOneOutputFileConsumer = consumer;
+            return this;
+        }
+        public Builder customSqlOutputFile(@NotNull Consumer<List<Injection>> consumer) {
+            this.injectionConfig.customSqlOutputFileConsumer = consumer;
             return this;
         }
 

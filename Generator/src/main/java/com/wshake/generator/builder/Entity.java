@@ -15,8 +15,8 @@
  */
 package com.wshake.generator.builder;
 
+import com.wshake.generator.config.PackageConfig;
 import com.wshake.generator.config.StrategyConfig;
-import com.wshake.generator.config.Table;
 import com.wshake.generator.utils.ClassUtils;
 import com.wshake.generator.utils.StringUtils;
 
@@ -24,11 +24,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * 实体属性配置
@@ -48,16 +44,25 @@ public class Entity implements ITemplate {
         return isOuter;
     }
 
-    private String outPath;
 
-    public String getOutPath() {
-        return outPath;
+    private Boolean isNewSuperClass=false;
+    public Boolean getIsNewSuperClass() {
+        return isNewSuperClass;
     }
 
-    private Boolean newSuperClass=false;
-    public Boolean getNewSuperClass() {
-        return newSuperClass;
+    private String newSuperClassTemplate="templates/baseEntity.java";
+    public String getNewSuperClassTemplate() {
+        return newSuperClassTemplate;
     }
+    private String newSuperClasOutPath="entity/base/BaseEntity.java";
+    public String getNewSuperClasOutPath() {
+        return newSuperClasOutPath;
+    }
+    public String getNewSuperClasOutName() {
+        return StringUtils.getFileName(newSuperClasOutPath);
+    }
+
+
 
     /**
      * 自定义基础的Entity类，公共字段
@@ -306,10 +311,11 @@ public class Entity implements ITemplate {
         data.put("superEntityClass", ClassUtils.getSimpleName(this.superClass));
         data.put("tableFills", this.tableFillList);
         data.put("superEntityColumns", this.superEntityColumns);
-        data.put("newSuperClass", this.newSuperClass);
+        data.put("isNewSuperClass", this.isNewSuperClass);
+        data.put("newSuperClassName",StringUtils.getFileName(this.newSuperClasOutPath));
+        data.put("newSuperClasOutPath",this.newSuperClasOutPath);
         return data;
     }
-
     /**
      * <p>
      * 父类 Class 反射属性转换为公共字段
@@ -334,13 +340,13 @@ public class Entity implements ITemplate {
             entity.isOuter = false;
             return this;
         }
-        public Entity.Builder outPath(String outPath) {
-            entity.outPath = outPath;
-            return this;
-        }
 
         public Entity.Builder enabledNewSuperClass() {
-            entity.newSuperClass = true;
+            entity.isNewSuperClass = true;
+            return this;
+        }
+        public Entity.Builder newSuperClasOutPath(String newSuperClasOutPath) {
+            entity.newSuperClasOutPath = newSuperClasOutPath;
             return this;
         }
 
@@ -464,6 +470,11 @@ public class Entity implements ITemplate {
          */
         public Builder logicDeletePropertyName(String logicDeletePropertyName) {
             this.entity.logicDeletePropertyName = logicDeletePropertyName;
+            return this;
+        }
+
+        public Builder newSuperClassTemplate(String newSuperClassTemplate) {
+            this.entity.newSuperClassTemplate = newSuperClassTemplate;
             return this;
         }
 

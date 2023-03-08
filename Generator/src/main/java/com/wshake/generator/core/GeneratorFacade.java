@@ -1,8 +1,10 @@
 package com.wshake.generator.core;
 
+import com.wshake.generator.builder.Entity;
 import com.wshake.generator.config.DataBase;
 import com.wshake.generator.config.DataSourceConfig;
 import com.wshake.generator.config.GlobalConfig;
+import com.wshake.generator.config.Injection;
 import com.wshake.generator.config.InjectionConfig;
 import com.wshake.generator.config.PackageConfig;
 import com.wshake.generator.config.StrategyConfig;
@@ -12,6 +14,8 @@ import com.wshake.generator.utils.PropertiesUtils;
 import com.wshake.generator.utils.StringUtils;
 
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -41,6 +45,10 @@ import freemarker.template.TemplateException;
  * 3.调用核心处理类完成代码生成工作
  */
 public class GeneratorFacade {
+    private Map<String,Object> dataModel = new HashMap<>();
+
+    protected static final Logger logger = LoggerFactory.getLogger(GeneratorFacade.class);
+
     /**
      * 数据源配置 Builder
      */
@@ -69,9 +77,6 @@ public class GeneratorFacade {
      * 注入配置 Builder
      */
     private final InjectionConfig.Builder injectionConfigBuilder;
-
-    private Map<String,Object> dataModel = new HashMap<>();
-
 
 
     private GeneratorFacade(DataSourceConfig.Builder dataSourceConfigBuilder) {
@@ -214,29 +219,29 @@ public class GeneratorFacade {
      */
     public void execute() throws SQLException, TemplateException, IOException {
         List<DataBase> dataBaseList = DataBaseUtils.getDataBase();
+        HashMap<String, Object> typeMap = new HashMap<>();
+        typeMap.putAll(PropertiesUtils.customMap);
+        //自定义配置
+        dataModel.put("javaType",typeMap);
+        dataModel.put("package",PackageConfig.getPackageConfig().getPackageInfo());
+        dataModel.put("global",GlobalConfig.getGlobalConfig().getConfigMap());
+        dataModel.put("entity",StrategyConfig.getStrategyConfig().entity().renderData());
+        dataModel.put("mapper",StrategyConfig.getStrategyConfig().mapper().renderData());
+        dataModel.put("service",StrategyConfig.getStrategyConfig().service().renderData());
+        dataModel.put("controller",StrategyConfig.getStrategyConfig().controller().renderData());
         for (DataBase dataBase:dataBaseList){
             //对每个DataBase进行代码生成
-            /**
-             * 数据模型
-             * 调用Generator核心处理
-             */
-            dataModel.putAll(getDataModel(dataBase));
-            for (Map.Entry<String,Object> entry:dataModel.entrySet()){
-                String key=entry.getKey();
-                Object value=entry.getValue();
-                System.out.println(key + ": "+value);
-            }
-            /**
-             * 准备数据模型
-             * 调用Generator核心处理
-             */
-            Generator generator = Generator.getGenerator();
-            generator.filterAndGenerate(dataModel);
+            tablesGenerated(dataBase);
+            //for (Map.Entry<String,Object> entry:dataModel.entrySet()){
+            //    String key=entry.getKey();
+            //    Object value=entry.getValue();
+            //    System.out.println(key + ": "+value);
+            //}
         }
         TemplateConfig templateConfig = TemplateConfig.getTemplateConfig();
         String mapper = templateConfig.getMapper();
-
         DataSourceConfig.getDataSourceConfig().closeAll();
+        logger.info("生成结束!");
     }
     /**
      * 根据DataBase对象获取数据模型
@@ -245,28 +250,28 @@ public class GeneratorFacade {
     public Map<String,Object> getCustomMap(){
         return dataModel;
     }
-    public Map<String,Object> getDataModel(DataBase dataBase){
-        Map<String,Object> dataModel = new HashMap<>();
-        HashMap<String, Object> typeMap = new HashMap<>();
-        typeMap.putAll(PropertiesUtils.customMap);
-        //自定义配置
-        dataModel.put("javaType",typeMap);
-        //元数据
-        dataModel.put("dataBase",dataBase);
+    public void tablesGenerated(DataBase dataBase) throws TemplateException, IOException {
+        logger.info("数据库 "+dataBase.getName()+" 开始生成。");
+        Entity entityConfig = StrategyConfig.getStrategyConfig().getEntity();
+        InjectionConfig injectionConfig=InjectionConfig.getInjectionConfig();
+        Generator generator = Generator.getGenerator();
+        if(entityConfig.getIsNewSuperClass()){
+            generator.oneGenerate(dataModel,entityConfig.getNewSuperClassTemplate(),entityConfig.getNewSuperClasOutPath());
+        }
         for (int i = 0; i < dataBase.getTables().size(); i++) {
             dataModel.put("table",dataBase.getTables().get(i));
-            //for(int j = 0; j < dataBase.getTables().get(i).getColumns().size(); j++){
-            //    dataModel.put("columns",dataBase.getTables().get(i).getColumns().get(j));
-            //}
+            /**
+             * 准备数据模型
+             * 调用Generator核心处理
+             */
+            generator.filterAndGenerate(dataModel);
         }
-
-        //setting
-        dataModel.put("package",PackageConfig.getPackageConfig().getPackageInfo());
-        dataModel.put("global",GlobalConfig.getGlobalConfig().getConfigMap());
-        dataModel.put("entity",StrategyConfig.getStrategyConfig().entity().renderData());
-        dataModel.put("mapper",StrategyConfig.getStrategyConfig().mapper().renderData());
-        dataModel.put("service",StrategyConfig.getStrategyConfig().service().renderData());
-        dataModel.put("controller",StrategyConfig.getStrategyConfig().controller().renderData());
-        return dataModel;
+        if(injectionConfig.isInjections()){
+            List<Injection> injections = injectionConfig.getInjections();
+            for (Injection in:injections) {
+                generator.oneGenerate(dataModel,in.getTemplatePath(),in.getOutputPath());
+            }
+        }
+        logger.info("数据库 "+dataBase.getName()+" 生成完成!");
     }
 }

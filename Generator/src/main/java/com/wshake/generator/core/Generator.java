@@ -14,6 +14,9 @@ import com.wshake.generator.utils.FileUtils;
 import com.wshake.generator.utils.PropertiesUtils;
 import com.wshake.generator.utils.StringUtils;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -26,10 +29,13 @@ import java.util.List;
 import java.util.Map;
 
 import freemarker.cache.FileTemplateLoader;
+import freemarker.core.ParseException;
 import freemarker.core.XMLOutputFormat;
 import freemarker.template.Configuration;
+import freemarker.template.MalformedTemplateNameException;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
+import freemarker.template.TemplateNotFoundException;
 import javafx.scene.control.Tab;
 
 /**
@@ -45,14 +51,10 @@ import javafx.scene.control.Tab;
  *  生成文件的路径
  */
 public class Generator {
+    protected static final Logger logger = LoggerFactory.getLogger(Generator.class);
     private static Generator generator;
 
     static {
-        try {
-            generator = new Generator();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
         try {
             generator = new Generator();
         } catch (IOException e) {
@@ -75,8 +77,6 @@ public class Generator {
         cfg.setDefaultEncoding(ConstVal.UTF8);
         cfg.setOutputFormat(XMLOutputFormat.INSTANCE);
         cfg.setClassForTemplateLoading(this.getClass(), "/");
-        FileTemplateLoader ftl = new FileTemplateLoader(new File(defaultTempPath));
-        cfg.setTemplateLoader(ftl);
     }
     /**
      * 代码生成
@@ -91,6 +91,31 @@ public class Generator {
         }
     }
 
+    public void oneGenerate(Map<String,Object> dataModel,String templateDir,String outputDirPath) throws IOException, TemplateException {
+        String templatePath=resourcesPath+"\\"+templateDir+".ftl";
+        File file = new File(templatePath);
+        String vmName = file.getName();
+        String fileName = StringUtils.getFileName(outputDirPath);
+        dataModel.put(StringUtils.getRemoveSuffixName(fileName),StringUtils.getPackage(outputDirPath));
+        try{
+            logger.info("加载模板地址:"+file.getAbsolutePath());
+            cfg.setTemplateLoader(new FileTemplateLoader(file.getParentFile()));
+            Template template = cfg.getTemplate(vmName);
+            String parentPackage=StringUtils.filePathNameUnificationDOT(packageConfig.getPackageModuleName());
+            String out=StringUtils.filePathNameUnification(outputDir+"/"+parentPackage+"/"+outputDirPath);
+            File fileOut = new File(out);
+            if (!fileOut.getParentFile().exists()){
+                fileOut.getParentFile().mkdirs();
+            }
+            FileWriter writer = new FileWriter(new File(out));
+            template.process(dataModel,writer);
+            writer.close();
+            logger.info(StringUtils.getFileName(outputDirPath)+" 生成成功!"+" 生成文件地址:"+out);
+        }catch (Exception e){
+            logger.error("生成代码异常", e);
+        }
+    }
+
     public void filterAndGenerate(Map<String,Object> dataModel) throws IOException, TemplateException {
         StrategyConfig strategyConfig = StrategyConfig.getStrategyConfig();
         Entity entityConfig = strategyConfig.getEntity();
@@ -98,74 +123,45 @@ public class Generator {
         Service serviceConfig = strategyConfig.getService();
         Controller controllerConfig = strategyConfig.getController();
         Map<String, Object> packageMap = (Map<String, Object>) dataModel.get("package");
+        TemplateConfig templateConfig = TemplateConfig.getTemplateConfig();
         if(entityConfig.isOuter()){
-            TemplateConfig templateConfig = TemplateConfig.getTemplateConfig();
             File file = new File(resourcesPath+templateConfig.getEntity()+".ftl");
             Map<String,Object> map = (Map<String,Object>) dataModel.get("entity");
-            if(StringUtils.isBlank(entityConfig.getOutPath())){
-                executeGenertor(dataModel,file,outputDir+"/"+packageMap.get(ConstVal.ENTITY),map);
-            }else {
-                executeGenertor(dataModel,file,entityConfig.getOutPath(),map);
-            }
+            executeGenertor(dataModel,file,outputDir+"/"+packageMap.get(ConstVal.ENTITY),map);
         }
         if(mapperConfig.isOuterMapper()){
-            TemplateConfig templateConfig = TemplateConfig.getTemplateConfig();
             File file = new File(resourcesPath+templateConfig.getMapper()+".ftl");
             Map<String,Object> map = (Map<String,Object>) dataModel.get("mapper");
             map.put("fileSuffixName",map.get("fileSuffixNameMapper"));
             map.put("filePrefixName",map.get("filePrefixNameMapper"));
-            if(StringUtils.isBlank(mapperConfig.getOutPathMapper())){
-                executeGenertor(dataModel,file,outputDir+"/"+packageMap.get(ConstVal.MAPPER),map);
-            }else {
-                executeGenertor(dataModel,file,mapperConfig.getOutPathMapper(),map);
-            }
+            executeGenertor(dataModel,file,outputDir+"/"+packageMap.get(ConstVal.MAPPER),map);
         }
         if(mapperConfig.isOuterXml()){
-            TemplateConfig templateConfig = TemplateConfig.getTemplateConfig();
             File file = new File(resourcesPath+templateConfig.getXml()+".ftl");
             Map<String,Object> map = (Map<String,Object>) dataModel.get("mapper");
             map.put("fileSuffixName",map.get("fileSuffixNameXml"));
             map.put("filePrefixName",map.get("filePrefixNameXml"));
-            if(StringUtils.isBlank(mapperConfig.getOutPathMapper())){
-                executeGenertor(dataModel,file,outputDir+"/"+packageMap.get(ConstVal.XML),map);
-            }else {
-                executeGenertor(dataModel,file,mapperConfig.getOutPathMapper(),map);
-            }
+            executeGenertor(dataModel,file,outputDir+"/"+packageMap.get(ConstVal.XML),map);
+
         }
         if(serviceConfig.getIsOuterService()){
-            TemplateConfig templateConfig = TemplateConfig.getTemplateConfig();
             File file = new File(resourcesPath+templateConfig.getService()+".ftl");
             Map<String,Object> map = (Map<String,Object>) dataModel.get("service");
             map.put("fileSuffixName",map.get("fileSuffixNameService"));
             map.put("filePrefixName",map.get("filePrefixNameService"));
-            //map.put("serviceNameImpl",map.get("fileSuffixNameService") + ((Table)dataModel.get("table")).getTableUpperName()+ map.get("filePrefixNameService"));
-            if(StringUtils.isBlank(serviceConfig.getOutPath())){
-                executeGenertor(dataModel,file,outputDir+"/"+packageMap.get(ConstVal.SERVICE),map);
-            }else {
-                executeGenertor(dataModel,file,serviceConfig.getOutPath(),map);
-            }
+            executeGenertor(dataModel,file,outputDir+"/"+packageMap.get(ConstVal.SERVICE),map);
         }
         if(serviceConfig.getIsOuterServiceImpl()){
-            TemplateConfig templateConfig = TemplateConfig.getTemplateConfig();
             File file = new File(resourcesPath+templateConfig.getServiceImpl()+".ftl");
             Map<String,Object> map = (Map<String,Object>) dataModel.get("service");
             map.put("fileSuffixName",map.get("fileSuffixNameServiceImpl"));
             map.put("filePrefixName",map.get("filePrefixNameServiceImpl"));
-            if(StringUtils.isBlank(serviceConfig.getOutPathImpl())){
-                executeGenertor(dataModel,file,outputDir+"/"+packageMap.get(ConstVal.SERVICE_IMPL),map);
-            }else {
-                executeGenertor(dataModel,file,serviceConfig.getOutPathImpl(),map);
-            }
+            executeGenertor(dataModel,file,outputDir+"/"+packageMap.get(ConstVal.SERVICE_IMPL),map);
         }
         if(controllerConfig.isOuter()){
-            TemplateConfig templateConfig = TemplateConfig.getTemplateConfig();
             File file = new File(resourcesPath+templateConfig.getController()+".ftl");
             Map<String,Object> map = (Map<String,Object>) dataModel.get("controller");
-            if(StringUtils.isBlank(controllerConfig.getOutPath())){
-                executeGenertor(dataModel,file,outputDir+"/"+packageMap.get(ConstVal.CONTROLLER),map);
-            }else {
-                executeGenertor(dataModel,file,controllerConfig.getOutPath(),map);
-            }
+            executeGenertor(dataModel,file,outputDir+"/"+packageMap.get(ConstVal.CONTROLLER),map);
         }
     }
 
@@ -181,30 +177,33 @@ public class Generator {
         //填充数据进入文件
         //String outFilePathName = processTemplateString(filePath,dataModel);
         //2.读取文件模板
-        Template template = cfg.getTemplate(filePath);
-        template.setOutputEncoding("utf-8");
-        //3.创建文件
-        if(filePath.endsWith("ftl")){
-            if(map!=null){
-                filePath = map.get("filePrefixName") + table.getTableUpperName()+ map.get("fileSuffixName")+"."+StringUtils.getSuffix(filePath);
-            }else {
-                filePath = table.getTableUpperName()+".java";
+        logger.info("加载模板地址:"+file.getAbsolutePath());
+        try {
+            cfg.setTemplateLoader(new FileTemplateLoader(file.getParentFile()));
+            Template template = cfg.getTemplate(filePath);
+            template.setOutputEncoding("utf-8");
+            //3.创建文件
+            if(filePath.endsWith("ftl")){
+                if(map!=null){
+                    filePath = map.get("filePrefixName") + table.getTableUpperName()+ map.get("fileSuffixName")+"."+StringUtils.getSuffix(filePath);
+                }else {
+                    filePath = table.getTableUpperName()+".java";
+                }
             }
+            File mkdirFile;
+            if(outPath==null){
+                mkdirFile = FileUtils.mkdir(StringUtils.filePathNameUnificationDOT(outputDir), filePath);
+            }else {
+                mkdirFile = FileUtils.mkdir(StringUtils.filePathNameUnificationDOT(outPath), filePath);
+            }
+            //4.模板处理(文件生成)
+            FileWriter fw=new FileWriter(mkdirFile);
+            template.process(dataModel,fw);
+            fw.close();
+            logger.info("表 "+ table.getTableUpperName() + " 生成成功!"+" 生成文件地址:"+mkdirFile.getAbsolutePath());
+        }catch (Exception e){
+            logger.error("生成代码异常", e);
         }
-        File mkdirFile;
-        if(outPath==null){
-            mkdirFile = FileUtils.mkdir(StringUtils.filePathNameUnification(outputDir), filePath);
-        }else {
-            mkdirFile = FileUtils.mkdir(StringUtils.filePathNameUnification(outPath), filePath);
-        }
-        //4.模板处理(文件生成)
-        FileWriter fw=new FileWriter(mkdirFile);
-        template.process(dataModel,fw);
-        fw.close();
-
-        //if(file.getName().endsWith("ftl")){
-        //    Template template = cfg.getTemplate(file.getName());
-        //}
     }
 
     public String processTemplateString(String templateString,Map<String,Object> dataModel) throws IOException, TemplateException {

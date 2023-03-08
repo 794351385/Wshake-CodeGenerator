@@ -52,16 +52,6 @@ public class Service implements ITemplate {
         return isOuterServiceImpl;
     }
 
-    private String outPathService;
-    private String outPathServiceImpl;
-
-    public String getOutPath() {
-        return outPathService;
-    }
-    public String getOutPathImpl() {
-        return outPathServiceImpl;
-    }
-
     private String fileSuffixNameService="Service";
 
     private String filePrefixNameService="";
@@ -156,14 +146,6 @@ public class Service implements ITemplate {
         }
         public Service.Builder noOuterServiceImpl() {
             service.isOuterServiceImpl = false;
-            return this;
-        }
-        public Service.Builder outPathService(String outPath) {
-            service.outPathService = outPath;
-            return this;
-        }
-        public Service.Builder outPathServiceImpl(String outPath) {
-            service.outPathServiceImpl = outPath;
             return this;
         }
 

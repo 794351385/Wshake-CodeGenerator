@@ -125,9 +125,6 @@ public class FileUtils {
             throw new IllegalArgumentException("dir is null");
         }
         File result=new File(dir,file);
-        if(result.exists()){
-
-        }
         if(!result.exists()) {
             result.getParentFile().mkdirs();
         }

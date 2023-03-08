@@ -13,6 +13,5 @@ import lombok.Data;
 public class Injection {
     private String templatePath;
     private String outputPath;
-    private String outputName;
     private Boolean isOutOne=false;
 }

@@ -40,20 +40,6 @@ public class TemplateConfig {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TemplateConfig.class);
 
-    //private Map<String,Object> templateMap=new HashMap<>();
-    //@Override
-    //public Map<String, Object> getConfigMap() {
-    //    Field[] fields = DataSourceConfig.class.getDeclaredFields();
-    //    for (Field field: fields) {
-    //        field.setAccessible(true);
-    //        try {
-    //            templateMap.put(field.getName(), field.get(this));
-    //        } catch (IllegalAccessException e) {
-    //            throw new RuntimeException(e);
-    //        }
-    //    }
-    //    return templateMap;
-    //}
     /**
      * 默认模板路径
      */
@@ -66,8 +52,10 @@ public class TemplateConfig {
      * 设置实体模板路径
      */
     private String entity;
-
-
+    /**
+     * 设置实体父类模板路径
+     */
+    private String entityBase;
     /**
      * 设置控制器模板路径
      */
@@ -102,15 +90,14 @@ public class TemplateConfig {
      * 不对外爆露
      */
     private TemplateConfig() {
-        String tempPath=System.getProperty("user.dir");
-        tempPath=tempPath+"/Generator/src/main/resources/templates";
-        this.defaultTempPath=tempPath;
+        this.defaultTempPath="/templates";
         this.entity = ConstVal.TEMPLATE_ENTITY_JAVA;
         this.controller = ConstVal.TEMPLATE_CONTROLLER;
         this.mapper = ConstVal.TEMPLATE_MAPPER;
         this.xml = ConstVal.TEMPLATE_XML;
         this.service = ConstVal.TEMPLATE_SERVICE;
         this.serviceImpl = ConstVal.TEMPLATE_SERVICE_IMPL;
+        this.entityBase=ConstVal.TEMPLATE_ENTITY_BASE;
     }
 
     /**
@@ -134,6 +121,12 @@ public class TemplateConfig {
     public String getEntity(Boolean kotlin) {
         if (!this.disableEntity) {
             return StringUtils.isBlank(this.entity) ? ConstVal.TEMPLATE_ENTITY_JAVA : this.entity;
+        }
+        return null;
+    }
+    public String getEntityBase(Boolean kotlin) {
+        if (!this.disableEntity) {
+            return StringUtils.isBlank(this.entityBase) ? ConstVal.TEMPLATE_ENTITY_BASE : this.entityBase;
         }
         return null;
     }
@@ -222,6 +215,12 @@ public class TemplateConfig {
             this.templateConfig = TemplateConfig.getTemplateConfig();
         }
 
+
+        public Builder entityBase(String entityBase) {
+            this.templateConfig.entityBase = entityBase;
+            return this;
+        }
+
         /**
          * 禁用所有模板
          *
@@ -239,6 +238,10 @@ public class TemplateConfig {
          */
         public Builder disable(@NotNull TemplateType... templateTypes) {
             this.templateConfig.disable(templateTypes);
+            return this;
+        }
+        public Builder setTemplatePath(String templatePath){
+            this.templateConfig.defaultTempPath = templatePath;
             return this;
         }
 

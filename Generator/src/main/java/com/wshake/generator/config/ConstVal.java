@@ -30,6 +30,7 @@ public interface ConstVal {
     String MODULE_NAME = "ModuleName";
 
     String ENTITY = "Entity";
+    String ENTITY_BASE="BaseEntity";
     String SERVICE = "Service";
     String SERVICE_IMPL = "ServiceImpl";
     String MAPPER = "Mapper";
@@ -49,11 +50,10 @@ public interface ConstVal {
      * 实体模板路径
      */
     String TEMPLATE_ENTITY_JAVA = "/templates/entity.java";
-
     /**
-     * 实体模板路径(kotlin模板)
+     * 实体父类模板路径
      */
-    String TEMPLATE_ENTITY_KT = "/templates/entity.kt";
+    String TEMPLATE_ENTITY_BASE="/templates/baseEntity.java";
 
     /**
      * 控制器模板路径

@@ -23,10 +23,20 @@ public class InjectionConfig {
         return injectionConfig;
     }
     private List<Injection> injections;
-    private Consumer<List<Injection>> beforeOutputFileConsumer;
+    private Consumer<List<Injection>> customOutputFileConsumer;
+
+    public Boolean isInjections(){
+        if(injections!=null && injections.size()>0){
+            return true;
+        }
+        return false;
+    }
+    public List<Injection> getInjections(){
+        return injections;
+    }
 
     @NotNull
-    public void beforeOutputFile(List<Injection> injections) {
+    public void customOutputFile(List<Injection> injections) {
         if(injections!=null && injections.size()!=0){
             this.injections=injections;
         }
@@ -49,8 +59,8 @@ public class InjectionConfig {
             this.injectionConfig = InjectionConfig.getInjectionConfig();
         }
 
-        public Builder beforeOutputFile(@NotNull Consumer<List<Injection>> consumer) {
-            this.injectionConfig.beforeOutputFileConsumer = consumer;
+        public Builder customOutputFile(@NotNull Consumer<List<Injection>> consumer) {
+            this.injectionConfig.customOutputFileConsumer = consumer;
             return this;
         }
 

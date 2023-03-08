@@ -23,23 +23,19 @@ public class Main {
         GeneratorFacade.create("jdbc:mysql://localhost:3306?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&nullCatalogMeansCurrent=true&useSSL=false",
                 "root","123456")
                 .globalConfig(builder -> {
-                    builder.author("Wshake")
-                            .build();
-                })
-                .globalConfig(builder -> {
                     builder.outputDir(property)
+                            .author("Wshake")
                             .enableSpringdoc();
                 })
                 .packageConfig(builder -> {
                     builder.parent("com.wshake")
                             .moduleName("generator")
-                            //.setModulTwoName("mall")
                             .build();
                 })
                 .strategyConfig(builder -> {
-                    builder.addDataBase("order");
+                    builder.addDataBase("students");
                     builder.controllerBuilder()
-                            //.noOuter()
+                            .noOuter()
                             .build();
                     builder.entityBuilder()
                             .enableColumnConstant()
@@ -50,9 +46,9 @@ public class Main {
                             .superClass(Main.class)
                             .enableChainModel()
                             .addTableFills(new ColumnFill("username",FieldFill.INSERT))
-                            .superClass(Main.class)
                             .addSuperEntityColumns("id","update_time")
-                            .noOuter()
+                            //.noOuter()
+                            .enabledNewSuperClass()
                             .build();
                     builder.serviceBuilder()
                             .noOuterService()
@@ -65,6 +61,9 @@ public class Main {
                             .noOuterXml()
                             .noOuterMapper()
                             .build();
+                })
+                .templateConfig(builder -> {
+                    builder.build();
                 })
                 .injectionConfig(builder -> {
                     //builder.beforeOutputFile(list->{

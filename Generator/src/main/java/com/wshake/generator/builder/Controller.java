@@ -48,12 +48,6 @@ public class Controller implements ITemplate {
         return isOuter;
     }
 
-    private String outPath;
-
-    public String getOutPath() {
-        return outPath;
-    }
-
     private String fileSuffixName="Controller";
 
     private String filePrefixName="";
@@ -140,10 +134,6 @@ public class Controller implements ITemplate {
 
         public Builder noOuter() {
             controller.isOuter = false;
-            return this;
-        }
-        public Builder outPath(String outPath) {
-            controller.outPath = outPath;
             return this;
         }
 

@@ -680,17 +680,40 @@ public final class StringUtils {
         return str;
     }
     public static String filePathNameUnification(String str){
-        str = str.replace("/","\\").replace(".","\\");
+        str = str.replace("/","\\");
+        return str;
+    }
+    public static String filePathNameUnificationDOT(String str){
+        str = str.replace(".","\\");
         return str;
     }
     public static String getFileName(String str){
         String[] split = str.split("\\\\");
-        return split[split.length - 1];
+        String[] spl = split[split.length - 1].split("/");
+        if(spl.length > 0){
+            return spl[spl.length - 1];
+        }else {
+            return split[split.length - 1];
+        }
     }
     public static String getSuffix(String str){
         String[] split = str.split("\\.");
         if (split.length>0){
             return split[split.length -2];
+        }else {
+            return str;
+        }
+    }
+    public static String getPackage(String str){
+        str=str.substring(0,str.length() - getFileName(str).length()-1);
+        str=filePathNameUnification(str);
+        str=str.replace("\\",".");
+        return str;
+    }
+    public static String getRemoveSuffixName(String str){
+        String[] split = str.split("\\.");
+        if (split.length>0){
+            return split[0];
         }else {
             return str;
         }

@@ -129,7 +129,8 @@ public class PackageConfig {
         return parent;
     }
 
-    @NotNull String getPackageModuleName() {
+    @NotNull
+    public String getPackageModuleName() {
         if(StringUtils.isBlank(this.moduleName)){
             if(StringUtils.isBlank(this.moduleTwoName)){
                 return parent+StringPool.DOT+moduleTwoName;

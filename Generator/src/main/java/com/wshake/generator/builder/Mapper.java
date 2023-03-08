@@ -15,15 +15,8 @@
  */
 package com.wshake.generator.builder;
 
-//import com.baomidou.mybatisplus.generator.ITemplate;
-//import com.baomidou.mybatisplus.generator.config.ConstVal;
-//import com.baomidou.mybatisplus.generator.config.StrategyConfig;
-//import com.baomidou.mybatisplus.generator.config.po.TableInfo;
-//import com.baomidou.mybatisplus.generator.function.ConverterFileName;
-//import com.baomidou.mybatisplus.generator.util.ClassUtils;
 import com.wshake.generator.config.ConstVal;
 import com.wshake.generator.config.StrategyConfig;
-import com.wshake.generator.config.Table;
 import com.wshake.generator.utils.ClassUtils;
 
 import org.apache.ibatis.cache.Cache;
@@ -57,17 +50,6 @@ public class Mapper implements ITemplate {
     public Boolean isOuterXml() {
         return isOuterXml;
     }
-
-    private String outPathMapper;
-    private String outPathXml;
-
-    public String getOutPathMapper() {
-        return outPathMapper;
-    }
-    public String getOutPathXml() {
-        return outPathXml;
-    }
-
     private String fileSuffixNameMapper="Mapper";
 
     private String filePrefixNameMapper="";
@@ -212,14 +194,6 @@ public class Mapper implements ITemplate {
         }
         public Mapper.Builder noOuterXml() {
             mapper.isOuterXml = false;
-            return this;
-        }
-        public Mapper.Builder outPathMapper(String outPath) {
-            mapper.outPathMapper = outPath;
-            return this;
-        }
-        public Mapper.Builder outPathXml(String outPath) {
-            mapper.outPathXml = outPath;
             return this;
         }
 

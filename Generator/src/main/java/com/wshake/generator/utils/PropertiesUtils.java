@@ -18,8 +18,7 @@ public class PropertiesUtils {
     public static Map<String,String> customMap=new HashMap<>();
 
     static {
-        String path=System.getProperty("user.dir");
-        path=path+"\\Generator\\src\\main\\resources";
+        String path=Thread.currentThread().getContextClassLoader().getResource("").getPath();
         List<File> files = FileUtils.searchFiles(new File(path));
         files.forEach(file->{
             if(file.getName().endsWith(".properties")){

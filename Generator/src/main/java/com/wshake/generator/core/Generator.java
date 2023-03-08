@@ -60,7 +60,7 @@ public class Generator {
         return generator;
     }
 
-    private String resourcesPath=System.getProperty("user.dir")+"/Generator/src/main/resources";
+    private String resourcesPath=Thread.currentThread().getContextClassLoader().getResource("").getPath();
     private Configuration cfg;
     private String defaultTempPath = TemplateConfig.getTemplateConfig().getDefaultTempPath();
 
@@ -114,7 +114,7 @@ public class Generator {
             writer.close();
             logger.info(outFile.getName()+" 生成成功!"+" 生成文件地址:"+out);
         }catch (Exception e){
-            logger.error("生成代码异常", e);
+            logger.error("生成代码异常");
         }
     }
 
@@ -200,7 +200,7 @@ public class Generator {
             //3.创建文件
             if(filePath.endsWith("ftl")){
                 if(map!=null){
-                    filePath = map.get("filePrefixName") + table.getTableUpperName()+ map.get("fileSuffixName")+"."+StringUtils.getSuffix(filePath);
+                    filePath = map.get("filePrefixName") + table.getTableUpperName()+ map.get("fileSuffixName")+".java";
                 }else {
                     filePath = table.getTableUpperName()+".java";
                 }
@@ -224,7 +224,7 @@ public class Generator {
             fw.close();
             logger.info(mkdirFile.getName()+ " 生成成功!"+" 生成文件地址:"+mkdirFile.getAbsolutePath());
         }catch (Exception e){
-            logger.error("生成代码异常", e);
+            logger.error("生成代码异常");
         }
     }
 
@@ -238,7 +238,4 @@ public class Generator {
         return out.toString();
     }
 
-    public static void main(String[] args) throws TemplateException, IOException {
-
-    }
 }

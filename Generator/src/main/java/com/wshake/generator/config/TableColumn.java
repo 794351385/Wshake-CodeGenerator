@@ -13,4 +13,15 @@ public class TableColumn {
     private String outputPath;
     private String fileSuffixName="";
     private String filePrefixName="";
+    public TableColumn(String templatePath, String outputPath, String filePrefixName, String fileSuffixName) {
+        this.templatePath = templatePath;
+        this.outputPath = outputPath;
+        this.fileSuffixName = fileSuffixName;
+        this.filePrefixName = filePrefixName;
+    }
+    public TableColumn(String templatePath, String outputPath) {
+        this.templatePath = templatePath;
+        this.outputPath = outputPath;
+    }
+
 }

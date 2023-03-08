@@ -40,7 +40,7 @@ public class Main {
                             //.fileOverride()
                             .build();
                     builder.controllerBuilder()
-                            .noOuter()
+                            //.noOuter()
                             .build();
                     builder.entityBuilder()
                             .enableColumnConstant()
@@ -53,7 +53,7 @@ public class Main {
                             .addTableFills(new ColumnFill("username",FieldFill.INSERT))
                             .addSuperEntityColumns("id","update_time")
                             //.noOuter()
-                            .enabledNewSuperClass()
+                            //.yesNewSuperClass()
                             .build();
                     builder.serviceBuilder()
                             .noOuterService()
@@ -73,10 +73,8 @@ public class Main {
                 .injectionConfig(builder -> {
                     builder.customSqlOutputFile(()->{
                         ArrayList<TableColumn> list = new ArrayList<>();
-                        TableColumn tableColumn = new TableColumn();
-                        tableColumn.setTemplatePath("templates/baseEntity.java.ftl");
-                        tableColumn.setOutputPath("demo");
-                        list.add(tableColumn);
+                        //TableColumn tableColumn = new TableColumn();
+                        //list.add(tableColumn);
                         return list;
                     })
                             .build();

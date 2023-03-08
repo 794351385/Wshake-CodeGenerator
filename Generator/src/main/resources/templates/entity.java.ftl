@@ -1,9 +1,6 @@
 package ${package.Entity};
 
 <#assign entityName ="${entity.filePrefixName}${table.tableUpperName}${entity.fileSuffixName}"/>
-<#--<#list table.importPackages as pkg>-->
-<#--import ${pkg};-->
-<#--</#list>-->
 <#if global.isSpringdoc>
 import io.swagger.v3.oas.annotations.media.Schema;
 <#elseif global.isSwagger>
@@ -25,6 +22,11 @@ import com.baomidou.mybatisplus.extension.activerecord.Model;
 <#if entity.superEntityClassPath??>
 import ${entity.superEntityClassPath};
 </#if>
+<#list table.columns as field>
+<#if (field.columnType!"defaultValue")=="BigDecimal">
+import java.math.BigDecimal;
+</#if>
+</#list>
 
 /**
 * ${table.comment!} Entity类
@@ -84,8 +86,8 @@ public class ${entityName} {
     @TableId(value = "${field.columnCamelName}", type = IdType.${entity.idType})
         </#if>
     <#-- 普通字段 -->
-        <#elseif field.fill??>
-        <#-- -----   存在字段填充设置   ----->
+    <#elseif field.fill??>
+    <#-- -----   存在字段填充设置   ----->
     @TableField(fill = FieldFill.${field.fill})
     </#if>
 <#-- 乐观锁注解 -->
@@ -98,8 +100,6 @@ public class ${entityName} {
     </#if>
     private ${field.columnType} ${field.columnCamelName};
 </#list>
-
-
 <#------------  END 字段循环遍历  ---------->
 <#if !entity.entityLombokModel>
     <#list table.columns as field>
@@ -144,12 +144,12 @@ public class ${entityName} {
         return "${table.tableUpperName}{" +
     <#list table.columns as field>
         <#if field_index==0>
-        "${field.columnCamelName} = " + ${field.columnCamelName} +
+            "${field.columnCamelName} = " + ${field.columnCamelName} +
         <#else>
-        ", ${field.columnCamelName} = " + ${field.columnCamelName} +
+            ", ${field.columnCamelName} = " + ${field.columnCamelName} +
         </#if>
     </#list>
-        "}";
+            "}";
     }
 </#if>
 }

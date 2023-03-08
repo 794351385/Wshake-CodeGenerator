@@ -1,6 +1,6 @@
 package ${package.Mapper};
 
-<#assign mapperName ="${mapper.filePrefixName}${table.tableUpperName}${mapper.fileSuffixName}"/>
+<#assign mapperName ="${mapper.filePrefixNameMapper}${table.tableUpperName}${mapper.fileSuffixNameMapper}"/>
 <#assign entityName ="${entity.filePrefixName}${table.tableUpperName}${entity.fileSuffixName}"/>
 import ${package.Entity}.${entityName};
 import ${mapper.superMapperClassPackage};
@@ -9,7 +9,7 @@ import ${mapper.mapperAnnotationClass.name};
 </#if>
 
 /**
-* ${table.comment!} Mapper类
+* ${table.comment!} Mapper接口
 *
 * @author ${global.author}
 * @since ${global.commentDate}

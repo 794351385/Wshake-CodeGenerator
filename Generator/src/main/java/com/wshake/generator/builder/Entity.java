@@ -341,7 +341,7 @@ public class Entity implements ITemplate {
             return this;
         }
 
-        public Entity.Builder enabledNewSuperClass() {
+        public Entity.Builder yesNewSuperClass() {
             entity.isNewSuperClass = true;
             return this;
         }

@@ -6,12 +6,13 @@ import com.wshake.generator.builder.Mapper;
 import com.wshake.generator.builder.Service;
 import com.wshake.generator.config.ConstVal;
 import com.wshake.generator.config.GlobalConfig;
+import com.wshake.generator.config.InjectionConfig;
 import com.wshake.generator.config.PackageConfig;
+import com.wshake.generator.config.TableColumn;
 import com.wshake.generator.config.StrategyConfig;
 import com.wshake.generator.config.Table;
 import com.wshake.generator.config.TemplateConfig;
 import com.wshake.generator.utils.FileUtils;
-import com.wshake.generator.utils.PropertiesUtils;
 import com.wshake.generator.utils.StringUtils;
 
 import org.slf4j.Logger;
@@ -20,23 +21,16 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import freemarker.cache.FileTemplateLoader;
-import freemarker.core.ParseException;
 import freemarker.core.XMLOutputFormat;
 import freemarker.template.Configuration;
-import freemarker.template.MalformedTemplateNameException;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
-import freemarker.template.TemplateNotFoundException;
-import javafx.scene.control.Tab;
 
 /**
  * @author Wshake
@@ -92,11 +86,12 @@ public class Generator {
     }
 
     public void oneGenerate(Map<String,Object> dataModel,String templateDir,String outputDirPath) throws IOException, TemplateException {
-        String templatePath=resourcesPath+"\\"+templateDir+".ftl";
+        String templatePath=resourcesPath+"\\"+templateDir;
         File file = new File(templatePath);
         String vmName = file.getName();
         String fileName = StringUtils.getFileName(outputDirPath);
         dataModel.put(StringUtils.getRemoveSuffixName(fileName),StringUtils.getPackage(outputDirPath));
+        StrategyConfig strategyConfig = StrategyConfig.getStrategyConfig();
         try{
             logger.info("加载模板地址:"+file.getAbsolutePath());
             cfg.setTemplateLoader(new FileTemplateLoader(file.getParentFile()));
@@ -104,13 +99,20 @@ public class Generator {
             String parentPackage=StringUtils.filePathNameUnificationDOT(packageConfig.getPackageModuleName());
             String out=StringUtils.filePathNameUnification(outputDir+"/"+parentPackage+"/"+outputDirPath);
             File fileOut = new File(out);
+            if(!strategyConfig.getIsFileOverride()){
+                if (fileOut.exists()){
+                    logger.warn(fileOut.getName()+" 文件已存在,已跳过");
+                    return;
+                }
+            }
             if (!fileOut.getParentFile().exists()){
                 fileOut.getParentFile().mkdirs();
             }
-            FileWriter writer = new FileWriter(new File(out));
+            File outFile = new File(out);
+            FileWriter writer = new FileWriter(outFile);
             template.process(dataModel,writer);
             writer.close();
-            logger.info(StringUtils.getFileName(outputDirPath)+" 生成成功!"+" 生成文件地址:"+out);
+            logger.info(outFile.getName()+" 生成成功!"+" 生成文件地址:"+out);
         }catch (Exception e){
             logger.error("生成代码异常", e);
         }
@@ -124,6 +126,19 @@ public class Generator {
         Controller controllerConfig = strategyConfig.getController();
         Map<String, Object> packageMap = (Map<String, Object>) dataModel.get("package");
         TemplateConfig templateConfig = TemplateConfig.getTemplateConfig();
+        InjectionConfig injectionConfig=InjectionConfig.getInjectionConfig();
+        if(injectionConfig.isSqlInjections()){
+            List<TableColumn> tableColumns = injectionConfig.getSqlInjections();
+            for (TableColumn in: tableColumns) {
+                Map<String,Object> map = (Map<String,Object>) dataModel.get("injection");
+                map.put("fileSuffixName",in.getFileSuffixName());
+                map.put("filePrefixName",in.getFilePrefixName());
+                File file = new File(resourcesPath+"\\"+in.getTemplatePath());
+                String parentPackage=StringUtils.filePathNameUnificationDOT(packageConfig.getPackageModuleName());
+                String out=StringUtils.filePathNameUnification(outputDir+"/"+parentPackage+"/"+in.getOutputPath());
+                executeGenertor(dataModel,file,out,map);
+            }
+        }
         if(entityConfig.isOuter()){
             File file = new File(resourcesPath+templateConfig.getEntity()+".ftl");
             Map<String,Object> map = (Map<String,Object>) dataModel.get("entity");
@@ -196,11 +211,18 @@ public class Generator {
             }else {
                 mkdirFile = FileUtils.mkdir(StringUtils.filePathNameUnificationDOT(outPath), filePath);
             }
+            StrategyConfig strategyConfig = StrategyConfig.getStrategyConfig();
+            if(!strategyConfig.getIsFileOverride()){
+                if (mkdirFile.exists()){
+                    logger.warn(mkdirFile.getName()+" 文件已存在,已跳过");
+                    return;
+                }
+            }
             //4.模板处理(文件生成)
             FileWriter fw=new FileWriter(mkdirFile);
             template.process(dataModel,fw);
             fw.close();
-            logger.info("表 "+ table.getTableUpperName() + " 生成成功!"+" 生成文件地址:"+mkdirFile.getAbsolutePath());
+            logger.info(mkdirFile.getName()+ " 生成成功!"+" 生成文件地址:"+mkdirFile.getAbsolutePath());
         }catch (Exception e){
             logger.error("生成代码异常", e);
         }

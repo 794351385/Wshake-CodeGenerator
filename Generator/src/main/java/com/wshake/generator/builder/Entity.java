@@ -50,7 +50,7 @@ public class Entity implements ITemplate {
         return isNewSuperClass;
     }
 
-    private String newSuperClassTemplate="templates/baseEntity.java";
+    private String newSuperClassTemplate="templates/baseEntity.java.ftl";
     public String getNewSuperClassTemplate() {
         return newSuperClassTemplate;
     }

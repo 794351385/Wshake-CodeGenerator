@@ -3,11 +3,12 @@ package com.wshake.generator;
 import com.wshake.generator.builder.ColumnFill;
 import com.wshake.generator.builder.FieldFill;
 import com.wshake.generator.builder.IdType;
-import com.wshake.generator.config.Injection;
+import com.wshake.generator.config.TableColumn;
 import com.wshake.generator.core.GeneratorFacade;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 import freemarker.template.TemplateException;
 
@@ -25,7 +26,8 @@ public class Main {
                 .globalConfig(builder -> {
                     builder.outputDir(property)
                             .author("Wshake")
-                            .enableSpringdoc();
+                            .enableSpringdoc()
+                            .build();
                 })
                 .packageConfig(builder -> {
                     builder.parent("com.wshake")
@@ -34,7 +36,9 @@ public class Main {
                 })
 
                 .strategyConfig(builder -> {
-                    builder.addDataBase("students");
+                    builder.addDataBase("students")
+                            //.fileOverride()
+                            .build();
                     builder.controllerBuilder()
                             .noOuter()
                             .build();
@@ -67,10 +71,15 @@ public class Main {
                     builder.build();
                 })
                 .injectionConfig(builder -> {
-                    //builder.beforeOutputFile(list->{
-                    //    Injection injection = new Injection();
-                    //    injection.setTemplatePath();
-                    //})
+                    builder.customSqlOutputFile(()->{
+                        ArrayList<TableColumn> list = new ArrayList<>();
+                        TableColumn tableColumn = new TableColumn();
+                        tableColumn.setTemplatePath("templates/baseEntity.java.ftl");
+                        tableColumn.setOutputPath("demo");
+                        list.add(tableColumn);
+                        return list;
+                    })
+                            .build();
                 })
                 .execute();
     }

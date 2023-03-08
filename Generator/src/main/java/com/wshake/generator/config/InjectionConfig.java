@@ -2,12 +2,10 @@ package com.wshake.generator.config;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
-import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * @author Wshake
@@ -22,11 +20,11 @@ public class InjectionConfig {
     public static InjectionConfig getInjectionConfig(){
         return injectionConfig;
     }
-    private List<Injection> oneInjections;
-    private Consumer<List<Injection>> customOneOutputFileConsumer;
+    private List<TableColumn> oneInjections;
+    private Supplier<List<TableColumn>> customOneOutputFileConsumer;
 
-    private List<Injection> sqlInjections;
-    private Consumer<List<Injection>> customSqlOutputFileConsumer;
+    private List<TableColumn> tableColumns;
+    private Supplier<List<TableColumn>> customSqlOutputFileConsumer;
 
     public Boolean isOneInjections(){
         if(oneInjections!=null && oneInjections.size()>0){
@@ -34,35 +32,36 @@ public class InjectionConfig {
         }
         return false;
     }
-    public List<Injection> getOneInjections(){
+    public List<TableColumn> getOneInjections(){
         return oneInjections;
     }
 
-    @NotNull
-    public void customOneOutputFile(List<Injection> injections) {
-        if(injections!=null && injections.size()!=0){
-            this.oneInjections=injections;
-        }
-    }
-
     public Boolean isSqlInjections(){
-        if(sqlInjections!=null && sqlInjections.size()>0){
+        if(tableColumns !=null && tableColumns.size()>0){
             return true;
         }
         return false;
     }
-    public List<Injection> getSqlInjections(){
-        return sqlInjections;
+    public List<TableColumn> getSqlInjections(){
+        return tableColumns;
     }
 
+    private String fileSuffixName="";
+    private String filePrefixName="";
+
+    public String getFileSuffixName() {
+        return fileSuffixName;
+    }
+    public String getFilePrefixName(){
+        return filePrefixName;
+    }
     @NotNull
-    public void customSqlOutputFile(List<Injection> injections) {
-        if(injections!=null && injections.size()!=0){
-            this.sqlInjections=injections;
-        }
+    public Map<String, Object> renderData() {
+        Map<String, Object> data = new HashMap<>();
+        data.put("fileSuffixName", this.fileSuffixName);
+        data.put("filePrefixName", this.filePrefixName);
+        return data;
     }
-
-
     /**
      * 模板路径配置构建者
      *
@@ -79,12 +78,14 @@ public class InjectionConfig {
             this.injectionConfig = InjectionConfig.getInjectionConfig();
         }
 
-        public Builder customOneOutputFile(@NotNull Consumer<List<Injection>> consumer) {
+        public Builder customOneOutputFile(@NotNull Supplier<List<TableColumn>> consumer) {
             this.injectionConfig.customOneOutputFileConsumer = consumer;
+            this.injectionConfig.oneInjections = this.injectionConfig.customOneOutputFileConsumer.get();
             return this;
         }
-        public Builder customSqlOutputFile(@NotNull Consumer<List<Injection>> consumer) {
+        public Builder customSqlOutputFile(@NotNull Supplier<List<TableColumn>> consumer) {
             this.injectionConfig.customSqlOutputFileConsumer = consumer;
+            this.injectionConfig.tableColumns = this.injectionConfig.customSqlOutputFileConsumer.get();
             return this;
         }
 

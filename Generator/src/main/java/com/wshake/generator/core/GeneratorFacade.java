@@ -4,10 +4,10 @@ import com.wshake.generator.builder.Entity;
 import com.wshake.generator.config.DataBase;
 import com.wshake.generator.config.DataSourceConfig;
 import com.wshake.generator.config.GlobalConfig;
-import com.wshake.generator.config.Injection;
 import com.wshake.generator.config.InjectionConfig;
 import com.wshake.generator.config.PackageConfig;
 import com.wshake.generator.config.StrategyConfig;
+import com.wshake.generator.config.TableColumn;
 import com.wshake.generator.config.TemplateConfig;
 import com.wshake.generator.utils.DataBaseUtils;
 import com.wshake.generator.utils.PropertiesUtils;
@@ -22,7 +22,6 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Scanner;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -225,6 +224,7 @@ public class GeneratorFacade {
         dataModel.put("javaType",typeMap);
         dataModel.put("package",PackageConfig.getPackageConfig().getPackageInfo());
         dataModel.put("global",GlobalConfig.getGlobalConfig().getConfigMap());
+        dataModel.put("injection",InjectionConfig.getInjectionConfig().renderData());
         dataModel.put("entity",StrategyConfig.getStrategyConfig().entity().renderData());
         dataModel.put("mapper",StrategyConfig.getStrategyConfig().mapper().renderData());
         dataModel.put("service",StrategyConfig.getStrategyConfig().service().renderData());
@@ -264,15 +264,11 @@ public class GeneratorFacade {
              * 准备数据模型
              * 调用Generator核心处理
              */
-            List<Injection> sqlInjections = injectionConfig.getSqlInjections();
-            for (Injection in:sqlInjections) {
-                generator.oneGenerate(dataModel,in.getTemplatePath(),in.getOutputPath());
-            }
             generator.filterAndGenerate(dataModel);
         }
         if(injectionConfig.isOneInjections()){
-            List<Injection> injections = injectionConfig.getOneInjections();
-            for (Injection in:injections) {
+            List<TableColumn> injections = injectionConfig.getOneInjections();
+            for (TableColumn in:injections) {
                 generator.oneGenerate(dataModel,in.getTemplatePath(),in.getOutputPath());
             }
         }

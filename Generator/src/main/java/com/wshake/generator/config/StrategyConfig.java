@@ -54,20 +54,10 @@ public class StrategyConfig extends Configuration {
     private StrategyConfig() {
     }
 
-    //private Map<String, Object> strategyConfigMap=new HashMap<>();
-    //@Override
-    //public Map<String, Object> getConfigMap() {
-    //    Field[] fields = DataSourceConfig.class.getDeclaredFields();
-    //    for (Field field: fields) {
-    //        field.setAccessible(true);
-    //        try {
-    //            strategyConfigMap.put(field.getName(), field.get(this));
-    //        } catch (IllegalAccessException e) {
-    //            throw new RuntimeException(e);
-    //        }
-    //    }
-    //    return strategyConfigMap;
-    //}
+    /**
+     * 是否覆盖已有文件（默认 false）（已迁移到策略配置中，3.5.4版本会删除此方法）
+     */
+    private Boolean fileOverride=false;
     /**
      * 需要生成的数据库
      */
@@ -149,6 +139,10 @@ public class StrategyConfig extends Configuration {
 
     private LikeTable likeTable;
     private LikeTable notLikeTable;
+
+    public Boolean getIsFileOverride() {
+        return fileOverride;
+    }
 
     public @Nullable LikeTable getLikeTable() {
         return this.likeTable;
@@ -400,6 +394,14 @@ public class StrategyConfig extends Configuration {
             super(StrategyConfig.getStrategyConfig());
         }
 
+
+        /**
+         * 覆盖已有文件
+         */
+        public Builder fileOverride() {
+            this.strategyConfig.fileOverride = true;
+            return this;
+        }
         /**
          * 开启大写命名
          *

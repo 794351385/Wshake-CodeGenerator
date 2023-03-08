@@ -113,8 +113,7 @@ public class Controller implements ITemplate {
     @Override
     @NotNull
     public Map<String, Object> renderData() {
-        Map<String, Object> data = new HashMap<>(5);
-
+        Map<String, Object> data = new HashMap<>();
         data.put("controllerMappingHyphenStyle", this.hyphenStyle);
         data.put("restControllerStyle", this.restStyle);
         data.put("superControllerClassPackage", StringUtils.isBlank(superClass) ? null : superClass);

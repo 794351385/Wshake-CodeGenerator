@@ -7,6 +7,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 </#if>
+import com.baomidou.mybatisplus.annotation.TableName;
+<#if table.keys??>
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.IdType;
+</#if>
 <#if entity.entityLombokModel>
 import lombok.Getter;
 import lombok.Setter;
@@ -25,8 +30,18 @@ import ${entity.superEntityClassPath};
 <#list table.columns as field>
 <#if (field.columnType!"defaultValue")=="BigDecimal">
 import java.math.BigDecimal;
+    <#break>
 </#if>
 </#list>
+<#list table.columns as field>
+    <#if (field.columnType!"defaultValue")=="Timestamp">
+import java.sql.Timestamp;
+        <#break>
+    </#if>
+</#list>
+<#if entity.activeRecord>
+import java.io.Serializable;
+</#if>
 
 /**
 * ${table.comment!} Entity类

@@ -39,7 +39,7 @@ public class Main {
                 .strategyConfig(builder -> {
                     builder.addDataBase("mall_wms")
                             //.fileOverride()
-                            .addTablePrefix("sms_","ums_","wms_","oms_","pms_")
+                            .addTablePrefix("sms_","ums_","oms_","pms_","wms_")
                             .build();
                     builder.controllerBuilder()
                             .noOuter()
@@ -66,6 +66,7 @@ public class Main {
                             .enableBaseResultMap()
                             .enableBaseColumnList()
                             //.noOuterXml()
+                            .enableMapperAnnotation()
                             .noOuterMapper()
                             .build();
                 })

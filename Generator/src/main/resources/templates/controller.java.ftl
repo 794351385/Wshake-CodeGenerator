@@ -22,7 +22,7 @@ import ${controller.superControllerClassPackage};
 <#else>
 @Controller
 </#if>
-@RequestMapping("<#if package.ModuleTwoName?? && package.ModuleTwoName != "">/${package.ModuleTwoName}<#elseif package.ModuleName?? && package.ModuleName != "">/${package.ModuleName}</#if>/${table.tableLowerName}")
+@RequestMapping("<#if package.ModuleName?? && package.ModuleName != "">/${package.ModuleName}</#if><#if package.ModuleTwoName?? && package.ModuleTwoName != "">/${package.ModuleTwoName}</#if>/${table.tableLowerName}")
 <#if controller.superControllerClass??>
 public class ${controllerName} extends ${controller.superControllerClass} {
 <#else>

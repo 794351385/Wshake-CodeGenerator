@@ -644,7 +644,7 @@ public final class StringUtils {
      */
     public static Boolean containsSplit(String str,String[] split){
         for(String s:split){
-            if(str.contains(s)){
+            if(str.equals(s)){
                 return true;
             }
         }

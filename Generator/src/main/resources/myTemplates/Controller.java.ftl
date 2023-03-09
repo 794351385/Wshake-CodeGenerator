@@ -52,7 +52,7 @@ import java.util.Map;
 <#else>
 @Controller
 </#if>
-@RequestMapping("<#if package.ModuleTwoName?? && package.ModuleTwoName != "">/${package.ModuleTwoName}<#elseif package.ModuleName?? && package.ModuleName != "">/${package.ModuleName}</#if>/${table.tableLowerName}")
+@RequestMapping("<#if package.ModuleName?? && package.ModuleName != "">/${package.ModuleName}</#if><#if package.ModuleTwoName?? && package.ModuleTwoName != "">/${package.ModuleTwoName}</#if>/${table.tableLowerName}")
 <#if global.isSpringdoc>
 @Tag(name="${table.comment!}")
 <#elseif global.isSwagger>
@@ -65,7 +65,8 @@ public class ${controllerName} extends ${controller.superControllerClass} {
 public class ${controllerName} {
 </#if>
     @Autowired
-    private ${serviceName} ${serviceName?cap_first};
+    private ${serviceName} ${serviceName?uncap_first};
+
     @GetMapping("page")
     <#if global.isSpringdoc>
     @Operation(summary = "分页")
@@ -88,7 +89,7 @@ public class ${controllerName} {
 <#assign nameDTO="${table.tableUpperName}DTO" />
     public R<PageData<#noparse><</#noparse>${nameDTO}>> page(@RequestParam PageVo pageVo,@RequestBody ${table.tableUpperName}DTO dto){
         QueryWrapper<${entityName}> wrapper = new QueryWrapper<>();
-        PageData<#noparse><</#noparse>${nameDTO}> page = ${serviceName?cap_first}.pageDTO(pageVo,wrapper);
+        PageData<#noparse><</#noparse>${nameDTO}> page = ${serviceName?uncap_first}.pageDTO(pageVo,wrapper);
         return R.ok(page);
     }
 
@@ -100,7 +101,7 @@ public class ${controllerName} {
     </#if>
 <#--    @RequiresPermissions("${moduleName}:${pathName}:info")-->
     public R<${nameDTO}> get(@PathVariable("id") Long id){
-        ${nameDTO} data = ${serviceName?cap_first}.getDTO(id);
+        ${nameDTO} data = ${serviceName?uncap_first}.getDTO(id);
         return R.ok(data);
     }
 
@@ -115,7 +116,7 @@ public class ${controllerName} {
     public R save(@RequestBody ${table.tableUpperName}DTO dto){
         //效验数据
         ValidatorUtils.validateEntity(dto, AddGroup.class, DefaultGroup.class);
-        ${serviceName?cap_first}.saveDTO(dto);
+        ${serviceName?uncap_first}.saveDTO(dto);
         return R.ok();
     }
 
@@ -130,7 +131,7 @@ public class ${controllerName} {
     public R update(@RequestBody ${table.tableUpperName}DTO dto){
         //效验数据
         ValidatorUtils.validateEntity(dto, UpdateGroup.class, DefaultGroup.class);
-        ${serviceName?cap_first}.updateDTO(dto);
+        ${serviceName?uncap_first}.updateDTO(dto);
         return R.ok();
     }
 
@@ -145,7 +146,7 @@ public class ${controllerName} {
     public R delete(@RequestBody Long[] ids){
         //效验数据
         AssertUtils.isArrayEmpty(ids, "id");
-        ${serviceName?cap_first}.deleteDTO(ids);
+        ${serviceName?uncap_first}.deleteDTO(ids);
         return R.ok();
     }
 <#--    ##@GetMapping("export")-->

@@ -118,6 +118,13 @@ public class Generator {
         }
     }
 
+    public String isAddSuffix(String str) {
+        if(StringUtils.getSuffix(str).equals(".ftl")){
+            return str;
+        }else {
+            return str+".ftl";
+        }
+    }
     public void filterAndGenerate(Map<String,Object> dataModel) throws IOException, TemplateException {
         StrategyConfig strategyConfig = StrategyConfig.getStrategyConfig();
         Entity entityConfig = strategyConfig.getEntity();
@@ -133,26 +140,26 @@ public class Generator {
                 Map<String,Object> map = (Map<String,Object>) dataModel.get("injection");
                 map.put("fileSuffixName",in.getFileSuffixName());
                 map.put("filePrefixName",in.getFilePrefixName());
-                File file = new File(resourcesPath+"\\"+in.getTemplatePath());
+                File file = new File(isAddSuffix(resourcesPath+"\\"+in.getTemplatePath()));
                 String parentPackage=StringUtils.filePathNameUnificationDOT(packageConfig.getPackageModuleName());
                 String out=StringUtils.filePathNameUnification(outputDir+"/"+parentPackage+"/"+in.getOutputPath());
                 executeGenertor(dataModel,file,out,map);
             }
         }
         if(entityConfig.isOuter()){
-            File file = new File(resourcesPath+templateConfig.getEntity()+".ftl");
+            File file = new File(isAddSuffix(resourcesPath+templateConfig.getEntity()));
             Map<String,Object> map = (Map<String,Object>) dataModel.get("entity");
             executeGenertor(dataModel,file,outputDir+"/"+packageMap.get(ConstVal.ENTITY),map);
         }
         if(mapperConfig.isOuterMapper()){
-            File file = new File(resourcesPath+templateConfig.getMapper()+".ftl");
+            File file = new File(isAddSuffix(resourcesPath+templateConfig.getMapper()));
             Map<String,Object> map = (Map<String,Object>) dataModel.get("mapper");
             map.put("fileSuffixName",map.get("fileSuffixNameMapper"));
             map.put("filePrefixName",map.get("filePrefixNameMapper"));
             executeGenertor(dataModel,file,outputDir+"/"+packageMap.get(ConstVal.MAPPER),map);
         }
         if(mapperConfig.isOuterXml()){
-            File file = new File(resourcesPath+templateConfig.getXml()+".ftl");
+            File file = new File(isAddSuffix(resourcesPath+templateConfig.getXml()));
             Map<String,Object> map = (Map<String,Object>) dataModel.get("mapper");
             map.put("fileSuffixName",map.get("fileSuffixNameXml"));
             map.put("filePrefixName",map.get("filePrefixNameXml"));
@@ -160,21 +167,21 @@ public class Generator {
 
         }
         if(serviceConfig.getIsOuterService()){
-            File file = new File(resourcesPath+templateConfig.getService()+".ftl");
+            File file = new File(isAddSuffix(resourcesPath+templateConfig.getService()));
             Map<String,Object> map = (Map<String,Object>) dataModel.get("service");
             map.put("fileSuffixName",map.get("fileSuffixNameService"));
             map.put("filePrefixName",map.get("filePrefixNameService"));
             executeGenertor(dataModel,file,outputDir+"/"+packageMap.get(ConstVal.SERVICE),map);
         }
         if(serviceConfig.getIsOuterServiceImpl()){
-            File file = new File(resourcesPath+templateConfig.getServiceImpl()+".ftl");
+            File file = new File(isAddSuffix(resourcesPath+templateConfig.getServiceImpl()));
             Map<String,Object> map = (Map<String,Object>) dataModel.get("service");
             map.put("fileSuffixName",map.get("fileSuffixNameServiceImpl"));
             map.put("filePrefixName",map.get("filePrefixNameServiceImpl"));
             executeGenertor(dataModel,file,outputDir+"/"+packageMap.get(ConstVal.SERVICE_IMPL),map);
         }
         if(controllerConfig.isOuter()){
-            File file = new File(resourcesPath+templateConfig.getController()+".ftl");
+            File file = new File(isAddSuffix(resourcesPath+templateConfig.getController()));
             Map<String,Object> map = (Map<String,Object>) dataModel.get("controller");
             executeGenertor(dataModel,file,outputDir+"/"+packageMap.get(ConstVal.CONTROLLER),map);
         }
@@ -197,13 +204,13 @@ public class Generator {
             cfg.setTemplateLoader(new FileTemplateLoader(file.getParentFile()));
             Template template = cfg.getTemplate(filePath);
             template.setOutputEncoding("utf-8");
+            String removeFirstSuffixName = StringUtils.getRemoveFirstSuffixName(filePath);
+            String dotSuffix=StringUtils.getSuffix(removeFirstSuffixName);
             //3.创建文件
-            if(filePath.endsWith("ftl")){
-                if(map!=null){
-                    filePath = map.get("filePrefixName") + table.getTableUpperName()+ map.get("fileSuffixName")+".java";
-                }else {
-                    filePath = table.getTableUpperName()+".java";
-                }
+            if(map!=null){
+                filePath = map.get("filePrefixName") + table.getTableUpperName()+ map.get("fileSuffixName")+dotSuffix;
+            }else {
+                filePath = table.getTableUpperName()+dotSuffix;
             }
             File mkdirFile;
             if(outPath==null){

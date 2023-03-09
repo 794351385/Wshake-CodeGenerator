@@ -1,0 +1,161 @@
+package ${package.Controller};
+
+<#assign controllerName ="${controller.filePrefixName}${table.tableUpperName}${controller.fileSuffixName}"/>
+<#assign entityName ="${entity.filePrefixName}${table.tableUpperName}${entity.fileSuffixName}"/>
+<#assign mapperName ="${mapper.filePrefixNameMapper}${table.tableUpperName}${mapper.fileSuffixNameMapper}"/>
+<#assign serviceName ="${service.filePrefixNameService}${table.tableUpperName}${service.fileSuffixNameService}"/>
+<#assign serviceImplName ="${service.filePrefixNameServiceImpl}${table.tableUpperName}${service.fileSuffixNameServiceImpl}"/>
+import ${package.packageTwo}.common.annotation.LogOperation;
+import ${package.packageTwo}.common.constant.Constant;
+import ${package.packageTwo}.common.page.PageData;
+import ${package.packageTwo}.common.utils.R;
+import ${package.packageTwo}.common.validator.AssertUtils;
+import ${package.packageTwo}.common.validator.ValidatorUtils;
+import ${package.packageTwo}.common.validator.group.AddGroup;
+import ${package.packageTwo}.common.validator.group.DefaultGroup;
+import ${package.packageTwo}.common.validator.group.UpdateGroup;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import ${package.Service}.${serviceName};
+import ${package.Entity}.${entityName};
+import ${package.packageAll}.dto.${table.tableUpperName}DTO;
+import ${package.packageTwo}.common.constant.PageVo;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Controller;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+<#if global.isSpringdoc>
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.tags.Tag;
+<#elseif global.isSwagger>
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
+import springfox.documentation.annotations.ApiIgnore;
+</#if>
+
+import java.util.List;
+import java.util.Map;
+
+/**
+* ${table.comment!} Controller类
+*
+* @author ${global.author}
+* @since ${global.commentDate}
+*/
+<#if controller.restControllerStyle>
+@RestController
+<#else>
+@Controller
+</#if>
+@RequestMapping("<#if package.ModuleTwoName?? && package.ModuleTwoName != "">/${package.ModuleTwoName}<#elseif package.ModuleName?? && package.ModuleName != "">/${package.ModuleName}</#if>/${table.tableLowerName}")
+<#if global.isSpringdoc>
+@Tag(name="${table.comment!}")
+<#elseif global.isSwagger>
+@Api(tag="${table.comment!}")
+</#if>
+@Slf4j
+<#if controller.superControllerClass??>
+public class ${controllerName} extends ${controller.superControllerClass} {
+<#else>
+public class ${controllerName} {
+</#if>
+    @Autowired
+    private ${serviceName} ${serviceName?cap_first};
+    @GetMapping("page")
+    <#if global.isSpringdoc>
+    @Operation(summary = "分页")
+    @Parameters({
+            @Parameter(name = Constant.PAGE, description = "当前页码，从1开始",in = ParameterIn.QUERY, required = true,schema = @Schema(type = "int")) ,
+            @Parameter(name = Constant.LIMIT, description = "每页显示记录数", in = ParameterIn.QUERY,required = true, schema = @Schema(type = "int")) ,
+            @Parameter(name = Constant.ORDER_FIELD, description = "排序字段", in = ParameterIn.QUERY, schema = @Schema(type = "String")) ,
+            @Parameter(name = Constant.ORDER, description = "排序方式，可选值(asc、desc)", in = ParameterIn.QUERY, schema = @Schema(type = "String"))
+    })
+    <#elseif global.isSwagger>
+    @ApiOperation("分页")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = Constant.PAGE, value = "当前页码，从1开始", paramType = "query", required = true, dataType="int") ,
+            @ApiImplicitParam(name = Constant.LIMIT, value = "每页显示记录数", paramType = "query",required = true, dataType="int") ,
+            @ApiImplicitParam(name = Constant.ORDER_FIELD, value = "排序字段", paramType = "query", dataType="String") ,
+            @ApiImplicitParam(name = Constant.ORDER, value = "排序方式，可选值(asc、desc)", paramType = "query", dataType="String")
+    })
+    </#if>
+<#--    @RequiresPermissions("${moduleName}:${pathName}:page")-->
+<#assign nameDTO="${table.tableUpperName}DTO" />
+    public R<PageData<#noparse><</#noparse>${nameDTO}>> page(@RequestParam PageVo pageVo,@RequestBody ${table.tableUpperName}DTO dto){
+        QueryWrapper<${entityName}> wrapper = new QueryWrapper<>();
+        PageData<#noparse><</#noparse>${nameDTO}> page = ${serviceName?cap_first}.pageDTO(pageVo,wrapper);
+        return R.ok(page);
+    }
+
+    @GetMapping("{id}")
+    <#if global.isSpringdoc>
+    @Operation(summary = "信息")
+    <#elseif global.isSwagger>
+    @ApiOperation("信息")
+    </#if>
+<#--    @RequiresPermissions("${moduleName}:${pathName}:info")-->
+    public R<${nameDTO}> get(@PathVariable("id") Long id){
+        ${nameDTO} data = ${serviceName?cap_first}.getDTO(id);
+        return R.ok(data);
+    }
+
+    @PostMapping("save")
+    <#if global.isSpringdoc>
+    @Operation(summary = "保存")
+    <#elseif global.isSwagger>
+    @ApiOperation("保存")
+    </#if>
+    @LogOperation("保存")
+<#--    @RequiresPermissions("${moduleName}:${pathName}:save")-->
+    public R save(@RequestBody ${table.tableUpperName}DTO dto){
+        //效验数据
+        ValidatorUtils.validateEntity(dto, AddGroup.class, DefaultGroup.class);
+        ${serviceName?cap_first}.saveDTO(dto);
+        return R.ok();
+    }
+
+    @PutMapping("update")
+    <#if global.isSpringdoc>
+    @Operation(summary = "修改")
+    <#elseif global.isSwagger>
+    @ApiOperation("修改")
+    </#if>
+    @LogOperation("修改")
+<#--    @RequiresPermissions("${moduleName}:${pathName}:update")-->
+    public R update(@RequestBody ${table.tableUpperName}DTO dto){
+        //效验数据
+        ValidatorUtils.validateEntity(dto, UpdateGroup.class, DefaultGroup.class);
+        ${serviceName?cap_first}.updateDTO(dto);
+        return R.ok();
+    }
+
+    @DeleteMapping("delete")
+    <#if global.isSpringdoc>
+    @Operation(summary = "删除")
+    <#elseif global.isSwagger>
+    @ApiOperation("删除")
+    </#if>
+    @LogOperation("删除")
+<#--    @RequiresPermissions("${moduleName}:${pathName}:delete")-->
+    public R delete(@RequestBody Long[] ids){
+        //效验数据
+        AssertUtils.isArrayEmpty(ids, "id");
+        ${serviceName?cap_first}.deleteDTO(ids);
+        return R.ok();
+    }
+<#--    ##@GetMapping("export")-->
+<#--    ##@ApiOperation("导出")-->
+<#--    ##@LogOperation("导出")-->
+<#--    ####@RequiresPermissions("${moduleName}:${pathName}:export")-->
+<#--    ##public void export(@ApiIgnore @RequestParam ${entity}DTO dto, HttpServletResponse response) throws Exception {-->
+<#--    ##    QueryWrapper<AttrEntity> wrapper = new QueryWrapper<>();-->
+<#--    ##    List<${entity}DTO> list = ${service}.listDTO(wrapper);-->
+<#--    ##-->
+<#--    ##    ExcelUtils.exportExcelToTarget(response, null, list, ${entity}Excel.class);-->
+<#--    ##}-->
+}

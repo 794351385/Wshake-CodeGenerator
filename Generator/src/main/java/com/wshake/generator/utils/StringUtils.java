@@ -307,7 +307,7 @@ public final class StringUtils {
      */
     public static String quotaMarkList(Collection<?> coll) {
         return coll.stream().map(StringUtils::quotaMark)
-            .collect(joining(StringPool.COMMA, StringPool.LEFT_BRACKET, StringPool.RIGHT_BRACKET));
+                .collect(joining(StringPool.COMMA, StringPool.LEFT_BRACKET, StringPool.RIGHT_BRACKET));
     }
 
     /**
@@ -553,8 +553,8 @@ public final class StringUtils {
         char lastChar = 'a';
         for (char c : s.toCharArray()) {
             if ((Character.isWhitespace(lastChar)) && (!Character.isWhitespace(c))
-                && ('-' != c) && (buf.length() > 0)
-                && (buf.charAt(buf.length() - 1) != '-')) {
+                    && ('-' != c) && (buf.length() > 0)
+                    && (buf.charAt(buf.length() - 1) != '-')) {
                 buf.append(StringPool.DASH);
             }
             if ('_' == c) {
@@ -697,11 +697,11 @@ public final class StringUtils {
         }
     }
     public static String getSuffix(String str){
-        String[] split = str.split("\\.");
-        if (split.length>0){
-            return split[split.length -2];
-        }else {
+        if(str.contains(".")) {
+            str=str.substring(str.lastIndexOf("."));
             return str;
+        }else {
+            return null;
         }
     }
     public static String getPackage(String str){
@@ -711,11 +711,15 @@ public final class StringUtils {
         return str;
     }
     public static String getRemoveSuffixName(String str){
-        String[] split = str.split("\\.");
-        if (split.length>0){
-            return split[0];
-        }else {
-            return str;
+        if(str.contains(".")){
+            str=str.substring(0,str.indexOf("."));
         }
+        return str;
+    }
+    public static String getRemoveFirstSuffixName(String str){
+        if(str.contains(".")){
+            str=str.substring(0,str.lastIndexOf("."));
+        }
+        return str;
     }
 }

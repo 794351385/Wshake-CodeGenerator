@@ -80,6 +80,10 @@ public class Entity implements ITemplate {
      */
     private final Set<String> ignoreColumns = new HashSet<>();
 
+    public Set<String> getIgnoredColumns(){
+        return ignoreColumns;
+    }
+
     /**
      * 实体是否生成 serialVersionUID
      */

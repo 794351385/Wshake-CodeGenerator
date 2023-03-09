@@ -52,7 +52,8 @@ public class PackageConfig {
     }
     public Map<String, String> getPackageInfo() {
         if (packageInfo.isEmpty()) {
-            packageInfo.put("packageAll", joinPackage(this.getModuleName()));
+            packageInfo.put("packageAll", this.getPackageModuleName());
+            packageInfo.put("packageTwo",this.getTwoParent());
             packageInfo.put("ModuleTwoName",this.moduleTwoName);
             packageInfo.put(ConstVal.MODULE_NAME, this.getModuleName());
             packageInfo.put(ConstVal.ENTITY, this.joinPackage(this.getEntity()));
@@ -98,7 +99,7 @@ public class PackageConfig {
     /**
      * Service Impl包名
      */
-    private String serviceImpl = "service.impl";
+    private String serviceImpl = "service.Impl";
 
     /**
      * Mapper包名
@@ -127,6 +128,14 @@ public class PackageConfig {
     @NotNull
     public String getParent() {
         return parent;
+    }
+
+    @NotNull
+    public String getTwoParent(){
+        if(StringUtils.isBlank(this.moduleName)){
+            return this.parent;
+        }
+        return this.parent+"."+this.moduleName;
     }
 
     @NotNull

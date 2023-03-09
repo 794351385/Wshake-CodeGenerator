@@ -20,8 +20,8 @@ import freemarker.template.TemplateException;
  */
 public class Main {
     public static void main(String[] args) throws SQLException, TemplateException, IOException {
-        String property=System.getProperty("user.dir") +"/Generator/src/main/java";
-        GeneratorFacade.create("jdbc:mysql://localhost:3306?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&nullCatalogMeansCurrent=true&useSSL=false",
+        String property=System.getProperty("user.dir") +"/service/mall-ware/src/main/java";
+        GeneratorFacade.create("jdbc:mysql://192.168.56.11:3306?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&nullCatalogMeansCurrent=true&useSSL=false",
                 "root","123456")
                 .globalConfig(builder -> {
                     builder.outputDir(property)
@@ -31,16 +31,18 @@ public class Main {
                 })
                 .packageConfig(builder -> {
                     builder.parent("com.wshake")
-                            .moduleName("generator")
+                            .moduleName("mall")
+                            .setModulTwoName("ware")
                             .build();
                 })
 
                 .strategyConfig(builder -> {
-                    builder.addDataBase("students")
+                    builder.addDataBase("mall_wms")
                             //.fileOverride()
+                            .addTablePrefix("sms_","ums_","wms_","oms_","pms_")
                             .build();
                     builder.controllerBuilder()
-                            //.noOuter()
+                            .noOuter()
                             .build();
                     builder.entityBuilder()
                             .enableColumnConstant()
@@ -48,12 +50,12 @@ public class Main {
                             .logicDeleteColumnName("is_deleted")
                             .idType(IdType.AUTO)
                             .enableLombok()
-                            .superClass(Main.class)
+                            //.superClass(Main.class)
                             .enableChainModel()
                             .addTableFills(new ColumnFill("username",FieldFill.INSERT))
                             .addSuperEntityColumns("id","update_time")
-                            //.noOuter()
-                            //.yesNewSuperClass()
+                            .noOuter()
+                            //.noNewSuperClass()
                             .build();
                     builder.serviceBuilder()
                             .noOuterService()
@@ -63,7 +65,7 @@ public class Main {
                             //.superClass(Main.class)
                             .enableBaseResultMap()
                             .enableBaseColumnList()
-                            .noOuterXml()
+                            //.noOuterXml()
                             .noOuterMapper()
                             .build();
                 })
@@ -73,8 +75,12 @@ public class Main {
                 .injectionConfig(builder -> {
                     builder.customSqlOutputFile(()->{
                         ArrayList<TableColumn> list = new ArrayList<>();
-                        //TableColumn tableColumn = new TableColumn();
-                        //list.add(tableColumn);
+                        list.add(new TableColumn("myTemplates/Service.java.ftl","service","","Service"));
+                        list.add(new TableColumn("myTemplates/ServiceImpl.java.ftl","service/Impl","","ServiceImpl"));
+                        list.add(new TableColumn("myTemplates/Mapper.java.ftl","mapper","","Mapper"));
+                        list.add(new TableColumn("myTemplates/Entity.java.ftl","entity","","Entity"));
+                        list.add(new TableColumn("myTemplates/DTO.java.ftl","dto","","DTO"));
+                        list.add(new TableColumn("myTemplates/Controller.java.ftl","controller","","Controller"));
                         return list;
                     })
                             .build();

@@ -74,17 +74,13 @@ public class DataBaseUtils {
         DataSourceConfig dataSourceConfig=DataSourceConfig.getDataSourceConfig();
         StrategyConfig strategyConfig=StrategyConfig.getStrategyConfig();
         ArrayList<Table> list = new ArrayList<>();
-        Set<String> exclude = strategyConfig.getExclude();
         if(tableNames==null||tableNames.size()==0){
             resultSet = dataSourceConfig.getResultSetTables(databaseName, null, strategyConfig.isSkipView());
             while (resultSet.next()){
                 Table table = tableProcessor(dataSourceConfig, databaseName, resultSet);
-                for (String excludeTable:exclude){
-                    if(table.getSqlTableName().equals(excludeTable)){
-                        continue;
-                    }
+                if(table!=null){
+                    list.add(table);
                 }
-                list.add(table);
             }
         }else {
             for (String tableName:tableNames) {
@@ -97,7 +93,7 @@ public class DataBaseUtils {
         }
         return list;
     }
-    
+
 
     /**
      * 表处理器
@@ -108,15 +104,38 @@ public class DataBaseUtils {
      * @throws SQLException
      */
     public static Table tableProcessor(DataSourceConfig dataSourceConfig,String databaseName,ResultSet resultSet) throws SQLException {
+        StrategyConfig strategyConfig = StrategyConfig.getStrategyConfig();
+
         Table table = new Table();
         //i sql表名称
-        table.setSqlTableName(resultSet.getString("TABLE_NAME"));
+        String sqlTableName = resultSet.getString("TABLE_NAME");
+        table.setSqlTableName(sqlTableName);
+        Set<String> tablePrefix = strategyConfig.getTablePrefix();
+        Set<String> tableSuffix = strategyConfig.getTableSuffix();
+        Set<String> exclude = strategyConfig.getExclude();
+        for (String ex : exclude) {
+            if(sqlTableName.equals(ex)){
+                return null;
+            }
+        }
+        for (String prefix : tablePrefix) {
+            if(StringUtils.startsWith(sqlTableName,prefix)){
+                StringUtils.removePrefixAfterPrefixToLower(sqlTableName,prefix.length());
+            }
+        }
+        for (String suffix : tableSuffix) {
+            if(StringUtils.startsWith(sqlTableName,suffix)){
+                StringUtils.removeSuffixAfterPrefixToLower(sqlTableName,suffix.length());
+            }
+        }
         //ii 处理后的tableName
-        String tableNameFilter = tableNameFilter(table.getSqlTableName());
+        String tableNameFilter = tableNameFilter(sqlTableName);
         table.setTableLowerName(tableNameFilter);
         table.setTableUpperName(StringUtils.firstToUpperCase(tableNameFilter));
+
         //ii 表备注
         table.setComment(resultSet.getString("REMARKS"));
+
         //iii 表主键
         ResultSet resultSetPrimaryKey = dataSourceConfig.getResultSetPrimaryKeys(databaseName, table.getSqlTableName());
         String keys="";
@@ -129,6 +148,7 @@ public class DataBaseUtils {
         ///iiii 获取列集合
         ResultSet resultSetColumns = dataSourceConfig.getResultSetColumns(table.getSqlTableName(), databaseName);
         List<Column> columns = columnProcessor(resultSetColumns,keys);
+
         table.setColumns(columns);
         return table;
     }
@@ -140,17 +160,36 @@ public class DataBaseUtils {
      * @throws SQLException
      */
     public static List<Column> columnProcessor(ResultSet resultSet,String keys) throws SQLException {
+        StrategyConfig strategyConfig = StrategyConfig.getStrategyConfig();
         Entity entity = StrategyConfig.getStrategyConfig().entity();
         List<IFill> fillList = entity.getTableFillList();
         Set<String> superEntityColumns = entity.getSuperEntityColumns();
         ArrayList<Column> columns = new ArrayList<>();
+        Set<String> ignoredColumns = entity.getIgnoredColumns();
+        Set<String> fieldPrefix = strategyConfig.getFieldPrefix();
+        Set<String> fieldSuffix = strategyConfig.getFieldSuffix();
         while (resultSet.next()){
             Column column = new Column();
             //i 列名称
             String columnName = resultSet.getString("COLUMN_NAME");
             column.setColumnSqlName(columnName);
+            for (String igColumn : ignoredColumns) {
+                if(columnName.equals(igColumn)){
+                    return null;
+                }
+            }
+            for (String prefix : fieldPrefix) {
+                if(StringUtils.startsWith(columnName,prefix)){
+                    StringUtils.removePrefixAfterPrefixToLower(columnName,prefix.length());
+                }
+            }
+            for (String suffix : fieldSuffix) {
+                if(StringUtils.startsWith(columnName,suffix)){
+                    StringUtils.removeSuffixAfterPrefixToLower(columnName,suffix.length());
+                }
+            }
             //ii 属性名
-            String str = columnNameFilter(column.getColumnSqlName());
+            String str = columnNameFilter(columnName);
             column.setColumnJavaName(str);
             //驼峰名
             str=StringUtils.underlineToCamel(str);
@@ -160,13 +199,13 @@ public class DataBaseUtils {
             str=StringUtils.removePrefix(str,"is");
             column.setColumnRemovePrefix(str);
             for (int i = 0; i < fillList.size(); i++) {
-                if(fillList.get(i).getName().equals(column.getColumnSqlName())){
+                if(fillList.get(i).getName().equals(columnName)){
                     column.setFill(fillList.get(i).getFieldFill().toString());
                     break;
                 }
             }
             for (String superEntityColumn : superEntityColumns) {
-                if (superEntityColumn.equals(column.getColumnSqlName())) {
+                if (superEntityColumn.equals(columnName)) {
                     column.setIsSuperColumn(true);
                     break;
                 }
@@ -179,17 +218,17 @@ public class DataBaseUtils {
             //iiiii 列备注
             column.setComment(resultSet.getString("REMARKS"));
             //iiiiii 是否为主键
-            if(StringUtils.containsSplit(column.getColumnSqlName(),keys.split(","))){
+            if(StringUtils.containsSplit(columnName,keys.split(","))){
                 column.setIsKey(true);
                 column.setKeyIdentityFlag(resultSet.getString("IS_AUTOINCREMENT").equals("YES"));
             }
-            if(entity.getVersionColumnName()!=null && entity.getVersionColumnName().equals(column.getColumnSqlName())){
+            if(entity.getVersionColumnName()!=null && entity.getVersionColumnName().equals(columnName)){
                 column.setIsVersion(true);
             }
             if (entity.getVersionPropertyName()!=null && entity.getVersionPropertyName().equals(column.getColumnCamelName())) {
                 column.setIsVersion(true);
             }
-            if(entity.getLogicDeleteColumnName()!=null && entity.getLogicDeleteColumnName().equals(column.getColumnSqlName())){
+            if(entity.getLogicDeleteColumnName()!=null && entity.getLogicDeleteColumnName().equals(columnName)){
                 column.setIsDeleted(true);
             }
             if (entity.getLogicDeletePropertyName()!=null && entity.getLogicDeletePropertyName().equals(column.getColumnCamelName())) {
@@ -199,7 +238,7 @@ public class DataBaseUtils {
         }
         return columns;
     }
-    
+
 
     /**
      * 表名过滤器

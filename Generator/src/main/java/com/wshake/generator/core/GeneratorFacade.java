@@ -46,6 +46,15 @@ import freemarker.template.TemplateException;
 public class GeneratorFacade {
     private Map<String,Object> dataModel = new HashMap<>();
 
+    public GeneratorFacade dataModel(Map<String,Object> dataModel) {
+        this.dataModel.putAll(dataModel);
+        return this;
+    }
+    public GeneratorFacade dataModel(String key,Object value) {
+        this.dataModel.put(key, value);
+        return this;
+    }
+
     protected static final Logger logger = LoggerFactory.getLogger(GeneratorFacade.class);
 
     /**

@@ -106,6 +106,7 @@ public class DataSourceConfig{
                         connectionProperties.forEach(properties::setProperty);
                         properties.put("user", username);
                         properties.put("password", password);
+                        properties.put("useInformationSchema", "true");
                         this.connection = DriverManager.getConnection(url, properties);
                     }
                 }

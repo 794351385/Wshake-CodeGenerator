@@ -9,8 +9,8 @@ import ${mapper.superMapperClassPackage};
 </#if>
 
 /**
-* ${table.comment!} Mapper类
-*
+* ${table.comment!} ${table.tableUpperName} 表
+* Controller类
 * @author ${global.author}
 * @since ${global.commentDate}
 */

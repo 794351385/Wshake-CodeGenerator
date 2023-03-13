@@ -230,6 +230,7 @@ public class GeneratorFacade {
         dataModel.put("service",StrategyConfig.getStrategyConfig().service().renderData());
         dataModel.put("controller",StrategyConfig.getStrategyConfig().controller().renderData());
         for (DataBase dataBase:dataBaseList){
+            dataModel.put("dataBase",dataBase);
             //对每个DataBase进行代码生成
             tablesGenerated(dataBase);
             //for (Map.Entry<String,Object> entry:dataModel.entrySet()){
@@ -251,7 +252,7 @@ public class GeneratorFacade {
         return dataModel;
     }
     public void tablesGenerated(DataBase dataBase) throws TemplateException, IOException {
-        logger.info("数据库 "+dataBase.getName()+" 开始生成。");
+        logger.info("数据库 "+dataBase.getSqlName()+" 开始生成。");
         Entity entityConfig = StrategyConfig.getStrategyConfig().getEntity();
         InjectionConfig injectionConfig=InjectionConfig.getInjectionConfig();
         Generator generator = Generator.getGenerator();
@@ -272,6 +273,9 @@ public class GeneratorFacade {
                 generator.oneGenerate(dataModel,in.getTemplatePath(),in.getOutputPath());
             }
         }
-        logger.info("数据库 "+dataBase.getName()+" 生成完成!");
+        logger.info("数据库 "+dataBase.getSqlName()+" 生成完成!");
+        if(Generator.isException()){
+            logger.error("表 "+Generator.getExceptionTable()+"生成异常！请查看");
+        }
     }
 }

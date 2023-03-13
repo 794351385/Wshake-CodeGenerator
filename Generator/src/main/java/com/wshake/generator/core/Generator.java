@@ -23,8 +23,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import freemarker.cache.FileTemplateLoader;
 import freemarker.core.XMLOutputFormat;
@@ -47,6 +49,14 @@ import freemarker.template.TemplateException;
 public class Generator {
     protected static final Logger logger = LoggerFactory.getLogger(Generator.class);
     private static Generator generator;
+    private static Boolean isException = false;
+    private static String exceptionTable = "";
+    public static String getExceptionTable() {
+        return exceptionTable;
+    }
+    public static Boolean isException(){
+        return isException;
+    }
 
     static {
         try {
@@ -114,6 +124,9 @@ public class Generator {
             writer.close();
             logger.info(outFile.getName()+" 生成成功!"+" 生成文件地址:"+out);
         }catch (Exception e){
+            isException=true;
+            Table table = (Table) dataModel.get("table");
+            exceptionTable+=table.getSqlTableName()+" ";
             logger.error("生成代码异常");
         }
     }
@@ -231,7 +244,9 @@ public class Generator {
             fw.close();
             logger.info(mkdirFile.getName()+ " 生成成功!"+" 生成文件地址:"+mkdirFile.getAbsolutePath());
         }catch (Exception e){
-            logger.error("生成代码异常");
+            isException=true;
+            exceptionTable+=table.getSqlTableName()+" ";
+            logger.error(filePath+" 文件生成异常");
         }
     }
 

@@ -96,9 +96,9 @@ public class ${entityName} {
     <#if field.isKey>
     <#-- 主键 -->
         <#if field.keyIdentityFlag>
-    @TableId(value = "${field.columnCamelName}", type = IdType.AUTO)
+    @TableId(value = "${field.columnSqlName}", type = IdType.AUTO)
         <#elseif entity.idType??>
-    @TableId(value = "${field.columnCamelName}", type = IdType.${entity.idType})
+    @TableId(value = "${field.columnSqlName}", type = IdType.${entity.idType})
         </#if>
     <#-- 普通字段 -->
     <#elseif field.fill??>

@@ -1,7 +1,9 @@
 package com.wshake.generator.config;
 
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import lombok.Data;
 
@@ -37,6 +39,27 @@ public class Table {
      * 主键列
      */
     private String keys;
+    /**
+     * 主键sql名
+     */
+    private Set<String> sqlKeyName=new HashSet<>();
+    public void putSqlKeyName(String sqlKeyName) {
+        this.sqlKeyName.add(sqlKeyName);
+    }
+    /**
+     * 主键java名
+     */
+    private Set<String> javaKeyName=new HashSet<>();
+    public void putJavaKeyName(String javaKeyName) {
+        this.javaKeyName.add(javaKeyName);
+    }
+    /**
+     * 主键驼峰名
+     */
+    private Set<String> camelKeyName=new HashSet<>();
+    public void putCamelKeyName(String camelKeyName) {
+        this.camelKeyName.add(camelKeyName);
+    }
 
     /**
      * 列集合

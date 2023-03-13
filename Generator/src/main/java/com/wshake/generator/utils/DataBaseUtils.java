@@ -47,14 +47,31 @@ public class DataBaseUtils {
         if(include.isEmpty() && !databases.isEmpty()){
             for (String database : databases) {
                 DataBase dataBase = new DataBase();
-                dataBase.setName(database);
+                dataBase.setSqlName(database);
+                String JavaName=database;
+                for (String dataBaseSuffix : strategyConfig.getDataBaseSuffix()) {
+                    if(StringUtils.endsWith(JavaName, dataBaseSuffix)){
+                        JavaName=StringUtils.removeSuffixAfterPrefixToLower(JavaName, dataBaseSuffix.length());
+                        break;
+                    }
+                }
+                for (String dataBasePrefix : strategyConfig.getDataBasePrefix()) {
+                    if(StringUtils.startsWith(JavaName, dataBasePrefix)){
+                        JavaName=StringUtils.removePrefixAfterPrefixToLower(JavaName, dataBasePrefix.length());
+                        break;
+                    }
+                }
+                dataBase.setJavaName(JavaName);
+                String camelName = StringUtils.underlineToCamel(JavaName);
+                dataBase.setCamelName(camelName);
+                dataBase.setUpperCamelName(StringUtils.firstToUpperCase(camelName));
                 dataBase.setTables(getTables(database, null));
                 dataBaseList.add(dataBase);
             }
         }else if (databases.size()==1){
             for (String database : databases) {
                 DataBase dataBase = new DataBase();
-                dataBase.setName(database);
+                dataBase.setSqlName(database);
                 dataBase.setTables(getTables(database, include));
                 dataBaseList.add(dataBase);
             }
@@ -121,11 +138,13 @@ public class DataBaseUtils {
         for (String prefix : tablePrefix) {
             if(StringUtils.startsWith(sqlTableName,prefix)){
                 StringUtils.removePrefixAfterPrefixToLower(sqlTableName,prefix.length());
+                break;
             }
         }
         for (String suffix : tableSuffix) {
             if(StringUtils.startsWith(sqlTableName,suffix)){
                 StringUtils.removeSuffixAfterPrefixToLower(sqlTableName,suffix.length());
+                break;
             }
         }
         //ii 处理后的tableName
@@ -142,6 +161,22 @@ public class DataBaseUtils {
         while (resultSetPrimaryKey.next()){
             String keyName = resultSetPrimaryKey.getString("COLUMN_NAME");
             keys+=keyName+",";
+            table.putSqlKeyName(keyName);
+            String javaKeyName=keyName;
+            for (String fieldPrefix : strategyConfig.getFieldPrefix()) {
+                if (StringUtils.startsWith(javaKeyName, fieldPrefix)) {
+                    javaKeyName = StringUtils.removePrefixAfterPrefixToLower(javaKeyName, fieldPrefix.length());
+                    break;
+                }
+            }
+            for (String fieldSuffix : strategyConfig.getFieldSuffix()) {
+                if (StringUtils.endsWith(javaKeyName, fieldSuffix)) {
+                    javaKeyName = StringUtils.removeSuffixAfterPrefixToLower(javaKeyName, fieldSuffix.length());
+                    break;
+                }
+            }
+            table.putJavaKeyName(javaKeyName);
+            table.putCamelKeyName(StringUtils.camelToUnderline(javaKeyName));
         }
         keys = keys.substring(0,keys.length() - 1);
         table.setKeys(keys);
@@ -210,11 +245,23 @@ public class DataBaseUtils {
                     break;
                 }
             }
+            String typeName = resultSet.getString("TYPE_NAME");
+            String columnSize = resultSet.getString("COLUMN_SIZE");
             //iii 列类型
-            column.setColumnDbType(resultSet.getString("TYPE_NAME"));
+            column.setColumnDbType(typeName);
+
             //iiii 列Java类型
-            String columnType = PropertiesUtils.customMap.get(column.getColumnDbType());
-            column.setColumnType(columnType);
+            if(typeName.equals("TINYINT") || typeName.equals("BIT")){
+                if(columnSize.equals("1")){
+                    column.setColumnType("Boolean");
+                }else {
+                    String columnType = PropertiesUtils.customMap.get(column.getColumnDbType());
+                    column.setColumnType(columnType);
+                }
+            }else {
+                String columnType = PropertiesUtils.customMap.get(column.getColumnDbType());
+                column.setColumnType(columnType);
+            }
             //iiiii 列备注
             column.setComment(resultSet.getString("REMARKS"));
             //iiiiii 是否为主键

@@ -100,6 +100,19 @@ public class StrategyConfig extends Configuration {
      * result: deleted_flag -> deleted
      */
     private final Set<String> fieldSuffix = new HashSet<>();
+    /**
+     * 过滤数据库前缀
+     * example: addFieldPrefix("is_")
+     * result: is_deleted -> deleted
+     */
+    private final Set<String> dataBasePrefix = new HashSet<>();
+
+    /**
+     * 过滤数据库后缀
+     * example: addFieldSuffix("_flag")
+     * result: deleted_flag -> deleted
+     */
+    private final Set<String> dataBaseSuffix = new HashSet<>();
 
     /**
      * 需要包含的表名，允许正则表达式（与exclude二选一配置）<br/>
@@ -486,6 +499,38 @@ public class StrategyConfig extends Configuration {
 
         public Builder addFieldSuffix(@NotNull List<String> fieldSuffixList) {
             this.strategyConfig.fieldSuffix.addAll(fieldSuffixList);
+            return this;
+        }
+
+        /**
+         * 增加过滤数据库前缀
+         *
+         * @param dataBasePrefix 过滤数据库前缀
+         * @return this
+         * @since 3.5.0
+         */
+        public Builder addDataBasePrefix(@NotNull String... dataBasePrefix) {
+            return addDataBasePrefix(Arrays.asList(dataBasePrefix));
+        }
+
+        public Builder addDataBasePrefix(@NotNull List<String> dataBasePrefix) {
+            this.strategyConfig.dataBasePrefix.addAll(dataBasePrefix);
+            return this;
+        }
+
+        /**
+         * 增加过滤数据库后缀
+         *
+         * @param dataBaseSuffix 过滤数据库后缀
+         * @return this
+         * @since 3.5.1
+         */
+        public Builder addDataBaseSuffix(@NotNull String... dataBaseSuffix) {
+            return addFieldSuffix(Arrays.asList(dataBaseSuffix));
+        }
+
+        public Builder addDataBaseSuffix(@NotNull List<String> dataBaseSuffix) {
+            this.strategyConfig.dataBaseSuffix.addAll(dataBaseSuffix);
             return this;
         }
 

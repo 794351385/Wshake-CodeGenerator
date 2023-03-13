@@ -7,8 +7,8 @@ import ${package.packageAll}.dto.${table.tableUpperName}DTO;
 import ${package.packageTwo}.common.service.CrudService;
 
 /**
-* ${table.comment!} Service类
-*
+* ${table.comment!} ${table.tableUpperName} 表
+* Controller类
 * @author ${global.author}
 * @since ${global.commentDate}
 */

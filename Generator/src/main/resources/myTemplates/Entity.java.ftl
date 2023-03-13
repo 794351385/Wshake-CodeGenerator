@@ -39,14 +39,20 @@ import java.sql.Timestamp;
         <#break>
     </#if>
 </#list>
+<#assign tag="0"/>
 <#if entity.activeRecord>
 import java.io.Serializable;
+<#assign tag="1"/>
+</#if>
+<#if tag=="0">
+<#if entity.entitySerialVersionUID>
+import java.io.Serializable;
+</#if>
 </#if>
 
-
 /**
-* ${table.comment!} Entity类
-*
+* ${table.comment!} ${table.tableUpperName} 表
+* Controller类
 * @author ${global.author}
 * @since ${global.commentDate}
 */
@@ -97,9 +103,9 @@ public class ${entityName} {
     <#if field.isKey>
     <#-- 主键 -->
         <#if field.keyIdentityFlag>
-    @TableId(value = "${field.columnCamelName}", type = IdType.AUTO)
+    @TableId(value = "${field.columnSqlName}", type = IdType.AUTO)
         <#elseif entity.idType??>
-    @TableId(value = "${field.columnCamelName}", type = IdType.${entity.idType})
+    @TableId(value = "${field.columnSqlName}", type = IdType.${entity.idType})
         </#if>
     <#-- 普通字段 -->
     <#elseif field.fill??>

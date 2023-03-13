@@ -14,7 +14,19 @@ public class DataBase {
     /**
      * 数据库库名
      */
-    private String name;
+    private String SqlName;
+    /**
+     * 数据库Java库名
+     */
+    private String JavaName;
+    /**
+     * 数据库驼峰库名
+     */
+    private String CamelName;
+    /**
+     * 数据库首字母大写驼峰库名
+     */
+    private String UpperCamelName;
 
     /**
      * 数据库表集合

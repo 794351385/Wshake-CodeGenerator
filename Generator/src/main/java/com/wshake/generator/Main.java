@@ -40,20 +40,22 @@ public class Main {
                     builder.addDataBase("mall_wms")
                             //.fileOverride()
                             .addTablePrefix("sms_","ums_","oms_","pms_","wms_")
+                            .addDataBasePrefix("mall_")
                             .build();
                     builder.controllerBuilder()
+                            .enableRestStyle()
                             .noOuter()
                             .build();
                     builder.entityBuilder()
                             .enableColumnConstant()
-                            .enableActiveRecord()
+                            //.enableActiveRecord()
                             .logicDeleteColumnName("is_deleted")
                             .idType(IdType.AUTO)
                             .enableLombok()
                             //.superClass(Main.class)
                             .enableChainModel()
-                            .addTableFills(new ColumnFill("username",FieldFill.INSERT))
-                            .addSuperEntityColumns("id","update_time")
+                            //.addTableFills(new ColumnFill("username",FieldFill.INSERT))
+                            //.addSuperEntityColumns("id","update_time")
                             .noOuter()
                             //.noNewSuperClass()
                             .build();
@@ -82,6 +84,8 @@ public class Main {
                         list.add(new TableColumn("myTemplates/Entity.java.ftl","entity","","Entity"));
                         list.add(new TableColumn("myTemplates/DTO.java.ftl","dto","","DTO"));
                         list.add(new TableColumn("myTemplates/Controller.java.ftl","controller","","Controller"));
+                        //list.add(new TableColumn("myTemplates/index.vue.ftl","vue","",""));
+                        //list.add(new TableColumn("myTemplates/add-or-update.vue.ftl","vue","","-add-or-update"));
                         return list;
                     })
                             .build();

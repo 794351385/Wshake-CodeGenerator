@@ -36,8 +36,8 @@ import java.sql.Timestamp;
 import java.io.Serializable;
 
 /**
-* ${table.comment!} DTO类
-*
+* ${table.comment!} ${table.tableUpperName} 表
+* Controller类
 * @author ${global.author}
 * @since ${global.commentDate}
 */

@@ -20,7 +20,6 @@ import ${package.Entity}.${entityName};
 import ${package.packageAll}.dto.${table.tableUpperName}DTO;
 import ${package.packageTwo}.common.constant.PageVo;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 <#if global.isSpringdoc>
@@ -42,8 +41,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
-* ${table.comment!} Controller类
-*
+* ${table.comment!} ${table.tableUpperName} 表
+* Controller类
 * @author ${global.author}
 * @since ${global.commentDate}
 */
@@ -67,29 +66,25 @@ public class ${controllerName} {
     @Autowired
     private ${serviceName} ${serviceName?uncap_first};
 
-    @GetMapping("page")
+    @PostMapping("page/{limit}/{current}")
     <#if global.isSpringdoc>
     @Operation(summary = "分页")
     @Parameters({
-            @Parameter(name = Constant.PAGE, description = "当前页码，从1开始",in = ParameterIn.QUERY, required = true,schema = @Schema(type = "int")) ,
-            @Parameter(name = Constant.LIMIT, description = "每页显示记录数", in = ParameterIn.QUERY,required = true, schema = @Schema(type = "int")) ,
-            @Parameter(name = Constant.ORDER_FIELD, description = "排序字段", in = ParameterIn.QUERY, schema = @Schema(type = "String")) ,
-            @Parameter(name = Constant.ORDER, description = "排序方式，可选值(asc、desc)", in = ParameterIn.QUERY, schema = @Schema(type = "String"))
+        @Parameter(name = Constant.LIMIT, description = "当前页码，从1开始", in = ParameterIn.QUERY, required = true, schema = @Schema(type = "integer")),
+        @Parameter(name = Constant.CURRENT, description = "每页显示记录数", in = ParameterIn.QUERY, required = true, schema = @Schema(type = "integer")),
     })
     <#elseif global.isSwagger>
     @ApiOperation("分页")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = Constant.PAGE, value = "当前页码，从1开始", paramType = "query", required = true, dataType="int") ,
-            @ApiImplicitParam(name = Constant.LIMIT, value = "每页显示记录数", paramType = "query",required = true, dataType="int") ,
-            @ApiImplicitParam(name = Constant.ORDER_FIELD, value = "排序字段", paramType = "query", dataType="String") ,
-            @ApiImplicitParam(name = Constant.ORDER, value = "排序方式，可选值(asc、desc)", paramType = "query", dataType="String")
+        @ApiImplicitParam(name = Constant.LIMIT, value = "当前页码，从1开始", paramType = "query", required = true, dataType = "integer"),
+        @ApiImplicitParam(name = Constant.CURRENT, value = "每页显示记录数", paramType = "query", required = true, dataType = "integer"),
     })
     </#if>
 <#--    @RequiresPermissions("${moduleName}:${pathName}:page")-->
 <#assign nameDTO="${table.tableUpperName}DTO" />
-    public R<PageData<#noparse><</#noparse>${nameDTO}>> page(@RequestParam PageVo pageVo,@RequestBody ${table.tableUpperName}DTO dto){
+    public R<PageData<#noparse><</#noparse>${nameDTO}>> page(@PathVariable long limit, @PathVariable long current, @RequestBody(required = false) PageVo<#noparse><</#noparse>${entityName}> pageVo){
         QueryWrapper<${entityName}> wrapper = new QueryWrapper<>();
-        PageData<#noparse><</#noparse>${nameDTO}> page = ${serviceName?uncap_first}.pageDTO(pageVo,wrapper);
+        PageData<#noparse><</#noparse>${nameDTO}> page = ${serviceName?uncap_first}.pageDTO(limit,current,pageVo,wrapper);
         return R.ok(page);
     }
 

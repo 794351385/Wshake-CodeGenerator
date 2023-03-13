@@ -12,8 +12,8 @@ import ${package.Mapper}.${mapperName};
 import ${package.Service}.${serviceName};
 
 /**
-* ${table.comment!} ServiceImpl类
-*
+* ${table.comment!} ${table.tableUpperName} 表
+* Controller类
 * @author ${global.author}
 * @since ${global.commentDate}
 */
